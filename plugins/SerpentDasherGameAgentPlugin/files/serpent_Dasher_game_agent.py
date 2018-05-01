@@ -17,10 +17,10 @@ class SerpentDasherGameAgent(GameAgent):
     def handle_play(self, game_frame):
         print('Space is spressed: ',str(keyboard.is_pressed('space')))
 
-        for i, game_frame in enumerate(self.game_frame_buffer.frames):
-            self.visual_debugger.store_image_data(
-                game_frame.frame,
-                game_frame.frame.shape,
-                str(i)
-            )
+        # for i, game_frame in enumerate(self.game_frame_buffer.frames):
+        #     self.visual_debugger.store_image_data(
+        #         game_frame.frame,
+        #         game_frame.frame.shape,
+        #         str(i)
+        #     )
         self.input_controller.tap_key(KeyboardKey.KEY_UP)
