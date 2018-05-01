@@ -1,0 +1,49 @@
+{
+    "plugins": {
+        "SerpentexitGamePlugin": {
+            "name": "SerpentexitGamePlugin",
+            "version": "0.1.0",
+            "files": [
+                {
+                    "path": "serpent_exit_game.py",
+                    "pluggable": "Game"
+                }
+            ],
+            "plugins": [],
+            "libraries": [],
+            "config": {
+                "fps": 2
+            }
+        },
+        "SerpentGeometryDashGamePlugin": {
+            "name": "SerpentGeometryDashGamePlugin",
+            "version": "0.1.0",
+            "files": [
+                {
+                    "path": "serpent_GeometryDash_game.py",
+                    "pluggable": "Game"
+                }
+            ],
+            "plugins": [],
+            "libraries": [],
+            "config": {
+                "fps": 2
+            }
+        },
+        "SerpentDasherGameAgentPlugin": {
+            "name": "SerpentDasherGameAgentPlugin",
+            "version": "0.1.0",
+            "files": [
+                {
+                    "path": "serpent_Dasher_game_agent.py",
+                    "pluggable": "GameAgent"
+                }
+            ],
+            "plugins": [],
+            "libraries": [],
+            "config": {
+                "frame_handler": "PLAY"
+            }
+        }
+    }
+}
