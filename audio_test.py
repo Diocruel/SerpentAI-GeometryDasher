@@ -4,14 +4,9 @@ import wave
 import keyboard
 import sys
 
-def save():
-    stream.stop_stream()
-    stream.close()
+def save(i):
 
-    #Close module
-    p.terminate()
-
-    filename = "out2.wav"
+    filename = "out%s.wav" %i
 
     waveFile = wave.open(filename, 'wb')
     waveFile.setnchannels(channelcount)
@@ -19,7 +14,13 @@ def save():
     waveFile.setframerate(int(device_info["defaultSampleRate"]))
     waveFile.writeframes(b''.join(recorded_frames))
     waveFile.close()
-  
+
+def stop():
+    stream.stop_stream()
+    stream.close()
+
+    #Close module
+    p.terminate()    
 
 defaultframes = 512
 
@@ -104,16 +105,18 @@ stream = p.open(format = pyaudio.paInt16,
 #Start Recording
 print ( "Starting... Press q to stop recording")
 print("Won't start recording till it hears a sound")
-stream.start_stream()
 def start():
     while not keyboard.is_pressed('q'):
     #for i in range(0, int(int(device_info["defaultSampleRate"]) / defaultframes * recordtime)):
         recorded_frames.append(stream.read(defaultframes))
-    
-try:
-    start()
-except KeyboardInterrupt:
-    save()
 
-save()
+for i in range(3):        
+    #try:
+    recorded_frames = []
+    keyboard.stash_state()
+    start()
+    #except KeyboardInterrupt:
+    #    save(i)
+  
+    save(i)
 
