@@ -90,7 +90,7 @@ else:
         print ("Selection is input and does not support loopback mode. Quitting.\n")
         exit()
 
-recordtime = int(input("Record time in seconds ["+ str(recordtime) + "]: ") or recordtime)
+#recordtime = int(input("Record time in seconds ["+ str(recordtime) + "]: ") or recordtime)
 
 #Open stream
 channelcount = device_info["maxInputChannels"] if (device_info["maxOutputChannels"] < device_info["maxInputChannels"]) else device_info["maxOutputChannels"]
@@ -106,17 +106,18 @@ stream = p.open(format = pyaudio.paInt16,
 print ( "Starting... Press q to stop recording")
 print("Won't start recording till it hears a sound")
 def start():
+    stream.start_stream()
     while not keyboard.is_pressed('q'):
     #for i in range(0, int(int(device_info["defaultSampleRate"]) / defaultframes * recordtime)):
         recorded_frames.append(stream.read(defaultframes))
 
 for i in range(3):        
-    #try:
-    recorded_frames = []
-    keyboard.stash_state()
-    start()
-    #except KeyboardInterrupt:
-    #    save(i)
-  
+    try:
+        recorded_frames = []
+        keyboard.stash_state()
+        start()
+    except KeyboardInterrupt:
+        save(i)
+    stream.stop_stream()
     save(i)
 
