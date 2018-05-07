@@ -12,7 +12,18 @@ class SerpentDasherGameAgent(GameAgent):
         self.frame_handler_setups["PLAY"] = self.setup_play
 
     def setup_play(self):
-        pass
+
+        context_classifier_path = f"datasets/context_classifier.model"
+
+        from serpent.machine_learning.context_classification.context_classifiers.cnn_inception_v3_context_classifier import \
+            CNNInceptionV3ContextClassifier
+        context_classifier = CNNInceptionV3ContextClassifier(
+            input_shape=(640, 480, 3))  # Replace with the shape (rows, cols, channels) of your captured context frames
+
+        context_classifier.prepare_generators()
+        context_classifier.load_classifier(context_classifier_path)
+
+        self.machine_learning_models["context_classifier"] = context_classifier
 
     def handle_play(self, game_frame):
         print('Space is spressed: ',str(keyboard.is_pressed('space')))
@@ -23,4 +34,6 @@ class SerpentDasherGameAgent(GameAgent):
         #         game_frame.frame.shape,
         #         str(i)
         #     )
-        self.input_controller.tap_key(KeyboardKey.KEY_UP)
+        # self.input_controller.tap_key(KeyboardKey.KEY_UP)
+        context = self.machine_learning_models["context_classifier"].predict(game_frame.frame)
+        print(context)
