@@ -3,13 +3,19 @@ import sounddevice as sd
 import wave
 import keyboard
 import sys
+import os
+
+mydir = os.path.dirname(__file__)
+subdir = 'audio'
+
 
 
 def save(i):
 
-    filename = "out%s.wav" %i
-
-    waveFile = wave.open(filename, 'wb')
+    filename = "%s.wav" %i
+    
+    wavefilepath = os.path.join(mydir, subdir, filename)
+    waveFile = wave.open(wavefilepath,'wb')
     waveFile.setnchannels(channelcount)
     waveFile.setsampwidth(p.get_sample_size(pyaudio.paInt16))
     waveFile.setframerate(int(device_info["defaultSampleRate"]))
@@ -101,12 +107,14 @@ def start():
     for i in range(0, int(int(device_info["defaultSampleRate"]) / defaultframes * recordtime)):
         recorded_frames.append(stream.read(defaultframes))
 
-for i in range(3):        
+counter = 0
+while not keyboard.is_pressed('q'):      
     try:
         recorded_frames = []
         keyboard.stash_state()
         start()
     except KeyboardInterrupt:
-        save(i)
+        save(counter)
     stream.stop_stream()
-    save(i)
+    save(counter)
+    counter+=1
