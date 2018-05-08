@@ -71,7 +71,11 @@ try:
     device_info = p.get_device_info_by_index(device_id)
 except IOError:
     device_info = p.get_device_info_by_index(default_device_index)
+<<<<<<< HEAD
     print("Selection not available, using default.")
+=======
+    print ("Selection not available, using default." )
+>>>>>>> f68dfd238324d4a2a0490107115625c981a207b5
 
 #Choose between loopback or standard mode
 is_input = device_info["maxInputChannels"] > 0
@@ -86,7 +90,11 @@ else:
         print("Selection is output and does not support loopback mode. Quitting.\n")
         exit()
 
+<<<<<<< HEAD
 #recordtime = int(input("Record time in seconds [" + str(recordtime) +"]: ") or recordtime)
+=======
+recordtime = int(input("Record time in seconds [" + str(recordtime) +"]: ") or recordtime)
+>>>>>>> f68dfd238324d4a2a0490107115625c981a207b5
 
 #Open stream
 channelcount = device_info["maxInputChannels"] if (device_info["maxOutputChannels"] < device_info["maxInputChannels"]) else device_info["maxOutputChannels"]
@@ -99,6 +107,7 @@ stream = p.open(format = pyaudio.paInt16,
                 as_loopback = useloopback)
                 
 #Start Recording
+<<<<<<< HEAD
 print ( "Starting... Press q to stop recording")
 print("Won't start recording till it hears a sound")
 def start():
@@ -118,3 +127,28 @@ while not keyboard.is_pressed('q'):
     stream.stop_stream()
     save(counter)
     counter+=1
+=======
+print("Starting...")
+
+for i in range(0, int(int(device_info["defaultSampleRate"]) / defaultframes * recordtime)):
+    recorded_frames.append(stream.read(defaultframes))
+    print(".")
+
+print("End.")
+#Stop Recording
+
+stream.stop_stream()
+stream.close()
+
+#Close module
+p.terminate()
+
+filename = input("Save as ["  + "out.wav" + "]: ") or "out.wav"
+
+waveFile = wave.open(filename, 'wb')
+waveFile.setnchannels(channelcount)
+waveFile.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+waveFile.setframerate(int(device_info["defaultSampleRate"]))
+waveFile.writeframes(b''.join(recorded_frames))
+waveFile.close()
+>>>>>>> f68dfd238324d4a2a0490107115625c981a207b5
