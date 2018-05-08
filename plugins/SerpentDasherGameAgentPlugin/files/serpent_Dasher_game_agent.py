@@ -16,7 +16,9 @@ class SerpentDasherGameAgent(GameAgent):
 
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\"), exist_ok=True)
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp), exist_ok=True)
-    open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt","w+")
+    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\jump\\"), exist_ok=True)
+    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\no_jump\\"), exist_ok=True)
+    #open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt","w+")
 
     keyboard.hook_key('space',lambda k: key_presses.append("Space pressed at frame: "+ str(frame_count) + "\n"))
 
@@ -31,6 +33,7 @@ class SerpentDasherGameAgent(GameAgent):
         pass
 
     def handle_play(self, game_frame):
+        print("Frames and key_presses are being recorded")
         global timestamp
         global frame_count
         global key_presses
@@ -40,11 +43,15 @@ class SerpentDasherGameAgent(GameAgent):
                 game_frame.grayscale_frame.shape,
                 str(i)
             )
-        im = Image.fromarray(game_frame.grayscale_frame)
+        im = Image.fromarray(game_frame.frame)
 
-        im.save("datasets\\" + timestamp + str(frame_count) + ".png")
-        f = open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt", "a+")
-        for j in key_presses:
-            f.write(j)
+
+        #f = open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt", "a+")
+        #for j in key_presses:
+        #    f.write(j)
+        if not key_presses:
+            im.save("datasets\\" + timestamp + "\\no_jump\\"+ str(frame_count) + ".png")
+        else:
+            im.save("datasets\\" + timestamp + "\\jump\\" + str(frame_count) + ".png")
         key_presses = []
         frame_count += 1
