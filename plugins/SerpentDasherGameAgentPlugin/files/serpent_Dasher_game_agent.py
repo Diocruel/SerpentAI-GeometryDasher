@@ -1,6 +1,7 @@
 from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
 import keyboard
+from . import ImageNetwork
 
 class SerpentDasherGameAgent(GameAgent):
 
@@ -15,9 +16,7 @@ class SerpentDasherGameAgent(GameAgent):
 
         context_classifier_path = f"datasets/context_classifier.model"
 
-        from serpent.machine_learning.context_classification.context_classifiers.cnn_inception_v3_context_classifier import \
-            CNNInceptionV3ContextClassifier
-        context_classifier = CNNInceptionV3ContextClassifier(
+        context_classifier = ImageNetwork.ImageNetwork(
             input_shape=(640, 480, 3))  # Replace with the shape (rows, cols, channels) of your captured context frames
 
         context_classifier.prepare_generators()
