@@ -5,18 +5,28 @@ from serpent.utilities import SerpentError
 try:
     from keras.preprocessing.image import ImageDataGenerator
     from keras.applications.inception_v3 import InceptionV3, preprocess_input
-    from keras.layers import Dense, GlobalAveragePooling2D
+    from keras.layers import (Dense, GlobalAveragePooling2D, Convolution2D,
+                              BatchNormalization, Flatten, GlobalMaxPool2D, MaxPool2D,
+                              concatenate, Activation)
     from keras.models import Model, load_model
     from keras.callbacks import ModelCheckpoint
+    from keras.utils import Sequence, to_categorical
+    from keras import backend as K
+
+
+
 except ImportError:
     raise SerpentError("Setup has not been been performed for the ML module. Please run 'serpent setup ml'")
 
 import skimage.transform
 
-import numpy as np
-
 import serpent.cv
+import numpy as np
+import random
+import os
 
+class ContextClassifierError(BaseException):
+    pass
 
 class ImageNetwork(ContextClassifier):
 
@@ -31,21 +41,53 @@ class ImageNetwork(ContextClassifier):
         if validate and (self.training_generator is None or self.validation_generator is None):
             self.prepare_generators()
 
-        base_model = InceptionV3(
-            weights="imagenet",
-            include_top=False,
-            input_shape=self.input_shape
-        )
+        #Not sure what this input shoul be, Input() is not working
+        #self.input_shape gives an error it should be a tensor.
+        #serpent give some input stuff from exsisting model, not sure how this works
 
-        output = base_model.output
-        output = GlobalAveragePooling2D()(output)
-        output = Dense(1024, activation='relu')(output)
+        #inp = Input(shape=self.input_shape)
+        inp = self.input_shape
+        x = Convolution2D(32, (8, 8), strides=4, padding="same")(inp)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        x = MaxPool2D()(x)
 
-        predictions = Dense(len(self.training_generator.class_indices), activation='softmax')(output)
-        self.classifier = Model(inputs=base_model.input, outputs=predictions)
+        x = Convolution2D(64, (4, 4), strides=2, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        x = MaxPool2D()(x)
 
-        for layer in base_model.layers:
-            layer.trainable = False
+        x = Convolution2D(64, (3, 3), strides=1, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        x = MaxPool2D()(x)
+
+        x = Flatten()(x)
+        x = Dense(64)(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+
+        predictions = Dense(len(self.training_generator.class_indices), activation='softmax')(x)
+        self.classifier = Model(inputs=inp, outputs=predictions)
+
+
+
+       #This loads an existing model, thats why you need 3 channels. We want our own model
+       # base_model = InceptionV3(
+       #     weights="imagenet",
+       #     include_top=False,
+       #     input_shape=self.input_shape
+       # )
+
+        #output = base_model.output
+        #output = GlobalAveragePooling2D()(output)
+        #output = Dense(1024, activation='relu')(output)
+
+        #predictions = Dense(len(self.training_generator.class_indices), activation='softmax')(output)
+        #self.classifier = Model(inputs=base_model.input, outputs=predictions)
+
+        #for layer in base_model.layers:
+        #    layer.trainable = False
 
         self.classifier.compile(
             optimizer="rmsprop",
@@ -133,3 +175,40 @@ class ImageNetwork(ContextClassifier):
             target_size=(self.input_shape[0], self.input_shape[1]),
             batch_size=32
         )
+
+
+
+    def executable_train(epochs=3, autosave=False, classifier="ImageNetwork", validate=True):
+        context_paths = list()
+
+        for root, directories, files in os.walk("datasets/collect_frames_for_context".replace("/", os.sep)):
+            if root != "datasets/collect_frames_for_context".replace("/", os.sep):
+                break
+
+            for directory in directories:
+                context_paths.append(f"datasets/collect_frames_for_context/{directory}".replace("/", os.sep))
+
+        if not len(context_paths):
+            raise ContextClassifierError("No Context Frames found in 'datasets/collect_frames_for_datasets'...")
+
+        serpent.datasets.create_training_and_validation_sets(context_paths)
+
+        context_path = random.choice(context_paths)
+        frame_path = None
+
+        for root, directories, files in os.walk(context_path):
+            for file in files:
+                if file.endswith(".png"):
+                    frame_path = f"{context_path}/{file}"
+                    break
+            if frame_path is not None:
+                break
+
+        frame = skimage.io.imread(frame_path)
+
+        imagenetwork = ImageNetwork(input_shape=frame.shape)
+        imagenetwork.train(epochs=epochs, autosave=autosave, validate=validate)
+        imagenetwork.validate()
+
+        ImageNetwork.save_classifier("datasets/context_classifier.model")
+        print("Success! Model was saved to 'datasets/context_classifier.model'")

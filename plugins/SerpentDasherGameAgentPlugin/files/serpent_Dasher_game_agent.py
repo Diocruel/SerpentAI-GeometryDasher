@@ -17,7 +17,7 @@ class SerpentDasherGameAgent(GameAgent):
         context_classifier_path = f"datasets/context_classifier.model"
 
         context_classifier = ImageNetwork.ImageNetwork(
-            input_shape=(640, 480, 3))  # Replace with the shape (rows, cols, channels) of your captured context frames
+            input_shape=(80, 40, 1))  # Replace with the shape (rows, cols, channels) of your captured context frames
 
         context_classifier.prepare_generators()
         context_classifier.load_classifier(context_classifier_path)
@@ -34,5 +34,6 @@ class SerpentDasherGameAgent(GameAgent):
         #         str(i)
         #     )
         # self.input_controller.tap_key(KeyboardKey.KEY_UP)
-        context = self.machine_learning_models["context_classifier"].predict(game_frame.frame)
+        eightframe = game_frame.eighth_resolution_frame
+        context = self.machine_learning_models["context_classifier"].predict(eightframe) #.eighth_resolution_frame)
         print(context)
