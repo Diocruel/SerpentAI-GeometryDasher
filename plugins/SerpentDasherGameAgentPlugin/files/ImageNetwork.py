@@ -5,7 +5,7 @@ from serpent.utilities import SerpentError
 try:
     from keras.preprocessing.image import ImageDataGenerator
     from keras.applications.inception_v3 import InceptionV3, preprocess_input
-    from keras.layers import (Dense, GlobalAveragePooling2D, Convolution2D,
+    from keras.layers import (Input, Dense, GlobalAveragePooling2D, Convolution2D,
                               BatchNormalization, Flatten, GlobalMaxPool2D, MaxPool2D,
                               concatenate, Activation)
     from keras.models import Model, load_model
@@ -45,8 +45,8 @@ class ImageNetwork(ContextClassifier):
         #self.input_shape gives an error it should be a tensor.
         #serpent give some input stuff from exsisting model, not sure how this works
 
-        #inp = Input(shape=self.input_shape)
-        inp = self.input_shape
+        inp = Input(shape=self.input_shape)
+        #inp = self.input_shape
         x = Convolution2D(32, (8, 8), strides=4, padding="same")(inp)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
@@ -210,5 +210,5 @@ class ImageNetwork(ContextClassifier):
         imagenetwork.train(epochs=epochs, autosave=autosave, validate=validate)
         imagenetwork.validate()
 
-        ImageNetwork.save_classifier("datasets/context_classifier.model")
+        ImageNetwork.save_classifier(imagenetwork, "datasets/context_classifier.model")
         print("Success! Model was saved to 'datasets/context_classifier.model'")
