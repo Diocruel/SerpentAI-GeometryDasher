@@ -97,16 +97,11 @@ def main():
   event = threading.Event()
   thread = threading.Thread(target=record, args=(event,))
   thread.start()
-
-  counter = 0
-  while counter<100000:
-    print(counter)
-    counter+=1
-  
-  #input("Press Enter to stop recording.")
-  event.set()
-  thread.join()
-  print("done")
+  while True:
+    if keyboard.is_pressed('q'): 
+        event.set()
+        thread.join()
+        print("done")
 
 
 main()
