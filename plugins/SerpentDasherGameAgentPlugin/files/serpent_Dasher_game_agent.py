@@ -2,6 +2,7 @@ from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
 import keyboard
 import os
+import numpy as np
 from PIL import Image
 from datetime import datetime
 
@@ -43,15 +44,15 @@ class SerpentDasherGameAgent(GameAgent):
                 game_frame.grayscale_frame.shape,
                 str(i)
             )
-        im = Image.fromarray(game_frame.frame)
-
+        small_im = game_frame.eighth_resolution_frame
+        gray_im = Image.fromarray(small_im).convert("L")
 
         #f = open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt", "a+")
         #for j in key_presses:
         #    f.write(j)
         if not key_presses:
-            im.save("datasets\\" + timestamp + "\\no_jump\\"+ str(frame_count) + ".png")
+            gray_im.save("datasets\\" + timestamp + "\\no_jump\\"+ str(frame_count) + ".png")
         else:
-            im.save("datasets\\" + timestamp + "\\jump\\" + str(frame_count) + ".png")
+            gray_im.save("datasets\\" + timestamp + "\\jump\\" + str(frame_count) + ".png")
         key_presses = []
         frame_count += 1
