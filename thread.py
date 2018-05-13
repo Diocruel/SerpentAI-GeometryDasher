@@ -9,14 +9,15 @@ import time
 
 
 FORMAT = pyaudio.paInt16
-CHANNELS = 2
-RATE = 44100
-CHUNK = 1024
-RECORD_SECONDS = 5
+defaultframes = 512
+recordtime = 0.5
 WAVE_OUTPUT_FILENAME = "file.wav"
 
 
 def record(event):
+    
+    mydir = os.path.dirname(__file__)
+    subdir = 'audio'
     p = pyaudio.PyAudio()
     
     #Select Device
@@ -59,32 +60,37 @@ def record(event):
     
     #Open stream
     channelcount = device_info["maxInputChannels"] if (device_info["maxOutputChannels"] < device_info["maxInputChannels"]) else device_info["maxOutputChannels"]
-    stream = p.open(format=FORMAT, channels=CHANNELS,
-                    rate=RATE, input=True,
-                    frames_per_buffer=CHUNK,
+    stream = p.open(format=FORMAT, channels=channelcount,
+                    rate=int(device_info["defaultSampleRate"]), input=True,
+                    frames_per_buffer=defaultframes,
                     input_device_index = device_info["index"],
                     as_loopback = useloopback)
 
     print("recording...")
-    frames = []
-
+    framecounter = 0
     while not event.wait(0):
-        data = stream.read(CHUNK)
-        frames.append(data)
+        frames = []
+        stream.start_stream()
+        for i in range(0, int(int(device_info["defaultSampleRate"]) / defaultframes * recordtime)):
+            frames.append(stream.read(defaultframes))
+            
+        stream.stop_stream()
+        filename = "%s.wav" %framecounter
+    
+        wavefilepath = os.path.join(mydir, subdir, filename)
+        waveFile = wave.open(wavefilepath,'wb')
+        waveFile.setnchannels(channelcount)
+        waveFile.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+        waveFile.setframerate(int(device_info["defaultSampleRate"]))
+        waveFile.writeframes(b''.join(frames))
+        waveFile.close()
+        framecounter+=1
     print("finished recording")
     
     # stop Recording
     stream.stop_stream()
     stream.close()
     p.terminate()
-    
-    print("writing file..")
-    waveFile = wave.open(WAVE_OUTPUT_FILENAME, 'wb')
-    waveFile.setnchannels(CHANNELS)
-    waveFile.setsampwidth(p.get_sample_size(FORMAT))
-    waveFile.setframerate(RATE)
-    waveFile.writeframes(b''.join(frames))
-    waveFile.close()
 
 
 def main():
