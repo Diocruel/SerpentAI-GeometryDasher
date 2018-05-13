@@ -2,6 +2,7 @@ from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
 import keyboard
 import os
+import _thread as thread
 import numpy as np
 from PIL import Image
 from datetime import datetime
@@ -9,9 +10,7 @@ from datetime import datetime
 class SerpentDasherGameAgent(GameAgent):
     global timestamp
     global frame_count
-    global key_presses
 
-    key_presses = []
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
     frame_count = 0
 
@@ -20,8 +19,6 @@ class SerpentDasherGameAgent(GameAgent):
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\jump\\"), exist_ok=True)
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\no_jump\\"), exist_ok=True)
     #open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt","w+")
-
-    keyboard.hook_key('space',lambda k: key_presses.append("Space pressed at frame: "+ str(frame_count) + "\n"))
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -34,10 +31,14 @@ class SerpentDasherGameAgent(GameAgent):
         pass
 
     def handle_play(self, game_frame):
-        print("Frames and key_presses are being recorded")
+
+        def save_game_frame(frame,name,print_message):
+            frame.save(name)
+            print(print_message)
+
         global timestamp
         global frame_count
-        global key_presses
+
         for i, game_frame in enumerate(self.game_frame_buffer.frames):
             self.visual_debugger.store_image_data(
                 game_frame.grayscale_frame,
@@ -47,12 +48,10 @@ class SerpentDasherGameAgent(GameAgent):
         small_im = game_frame.eighth_resolution_frame
         gray_im = Image.fromarray(small_im).convert("L")
 
-        #f = open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt", "a+")
-        #for j in key_presses:
-        #    f.write(j)
-        if not key_presses:
-            gray_im.save("datasets\\" + timestamp + "\\no_jump\\"+ str(frame_count) + ".png")
+        key_pressed = keyboard.is_pressed('space')
+        if key_pressed:
+            thread.start_new_thread(save_game_frame,(gray_im,"datasets\\" + timestamp + "\\jump\\" + str(frame_count) + ".png","Writing to jump",))
         else:
-            gray_im.save("datasets\\" + timestamp + "\\jump\\" + str(frame_count) + ".png")
-        key_presses = []
+            thread.start_new_thread(save_game_frame,(gray_im,"datasets\\" + timestamp + "\\no_jump\\"+ str(frame_count) + ".png","Writing to no_jump",))
+
         frame_count += 1
