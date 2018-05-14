@@ -2,6 +2,7 @@ from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
 import keyboard
 from . import ImageNetwork
+from time import time
 
 class SerpentDasherGameAgent(GameAgent):
 
@@ -14,7 +15,7 @@ class SerpentDasherGameAgent(GameAgent):
 
     def setup_play(self):
 
-        context_classifier_path = f"datasets/context_classifier.model"
+        context_classifier_path = f"datasets/context_classifier_01-1.82.model"
 
         context_classifier = ImageNetwork.ImageNetwork(
             input_shape=(480, 640, 3))  # Replace with the shape (rows, cols, channels) of your captured context frames
@@ -35,7 +36,10 @@ class SerpentDasherGameAgent(GameAgent):
         #     )
         # self.input_controller.tap_key(KeyboardKey.KEY_UP)
         eightframe = game_frame#.grayscale_frame#.eighth_resolution_frame
+        start = time()
         context = self.machine_learning_models["context_classifier"].predict(eightframe.frame)
+        end = time()
         if (context == 'jump') :
             self.input_controller.tap_key(KeyboardKey.KEY_UP)
         print(context)
+        print("time : " + str(end-start))
