@@ -21,4 +21,4 @@ for file in os.listdir(directory):
                         print(nojumpfullpath+" deleted")
                     else:
                         print("file does not exist")
-        #os.remove(directory+"/"+file)
+        os.remove(directory+"/"+file)
