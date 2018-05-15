@@ -36,14 +36,9 @@ class SerpentDasherGameAgent(GameAgent):
     def handle_play(self, game_frame):
 
         def save_game_frame(frame,frame_cnt):
-            if not key_pressed:
-                time.sleep(0.03)
-                if not (key_pressed or old_key_pressed):
-                    frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
-                    print("Writing to no_jump")
-                else:
-                    frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
-                    print("Writing to jump")
+            if not (key_pressed or old_key_pressed):
+                frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
+                print("Writing to no_jump")
             else:
                 frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
                 print("Writing to jump")
