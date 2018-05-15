@@ -8,6 +8,7 @@ import time
 from PIL import Image
 from datetime import datetime
 
+from serpent.sprite import Sprite
 class SerpentDasherGameAgent(GameAgent):
     global timestamp
     global frame_count
@@ -16,7 +17,7 @@ class SerpentDasherGameAgent(GameAgent):
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
     frame_count = 0
     key_pressed = False
-
+   
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\"), exist_ok=True)
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp), exist_ok=True)
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\jump\\"), exist_ok=True)
@@ -34,14 +35,23 @@ class SerpentDasherGameAgent(GameAgent):
         pass
 
     def handle_play(self, game_frame):
-
-        def save_game_frame(frame,frame_cnt):
-            if not (key_pressed or old_key_pressed):
-                frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
-                print("Writing to no_jump")
-            else:
-                frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
-                print("Writing to jump")
+        filename = os.getcwd() + "\\datasets\\collect_frames\\frame_1526370224.6186867.png"
+        image= Image.open(filename)
+        image_data = image[...,np.nweaxis]
+        sprite = Sprite("GameOver", image_data=image_data)
+        sprite_name = self.sprite_indentifier(sprite, mode="SIGNATURE_COLORS")
+        if sprite_name == "GameOver" :
+            print("game over")
+        else:
+            print('playing')
+		
+        #def save_game_frame(frame,frame_cnt):
+            #if not (key_pressed or old_key_pressed):
+                #frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
+                #print("Writing to no_jump")
+            #else:
+                #frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
+                #print("Writing to jump")
 
         global timestamp
         global frame_count
@@ -59,5 +69,5 @@ class SerpentDasherGameAgent(GameAgent):
         gray_im = Image.fromarray(small_im).convert("L")
         old_key_pressed = key_pressed
         key_pressed = keyboard.is_pressed('space')
-        thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
+        #thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
         frame_count += 1
