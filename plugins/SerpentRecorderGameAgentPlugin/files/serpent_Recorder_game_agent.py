@@ -8,7 +8,7 @@ import time
 from PIL import Image
 from datetime import datetime
 
-class SerpentDasherGameAgent(GameAgent):
+class SerpentRecorderGameAgent(GameAgent):
     global timestamp
     global frame_count
     global key_pressed
