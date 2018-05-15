@@ -2,7 +2,9 @@ from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
 import keyboard
 
+from serpent.sprite import Sprite
 class SerpentDasherGameAgent(GameAgent):
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
