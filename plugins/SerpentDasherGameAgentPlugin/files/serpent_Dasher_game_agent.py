@@ -1,7 +1,11 @@
 from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
 import keyboard
-from . import ImageNetwork
+import os
+import sys
+sys.path.append(os.getcwd())
+from ImageNetwork import ImageNetwork
+
 from time import time
 
 class SerpentDasherGameAgent(GameAgent):
@@ -15,9 +19,10 @@ class SerpentDasherGameAgent(GameAgent):
 
     def setup_play(self):
 
+
         context_classifier_path = f"datasets/pretrained_classifier.model"
 
-        context_classifier = ImageNetwork.ImageNetwork(
+        context_classifier = ImageNetwork(
             input_shape=(60, 80, 3))  # Replace with the shape (rows, cols, channels) of your captured context frames
 
         context_classifier.prepare_generators()
