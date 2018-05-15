@@ -181,12 +181,12 @@ class ImageNetwork(ContextClassifier):
     def executable_train(epochs=3, autosave=False, classifier="ImageNetwork", validate=True):
         context_paths = list()
 
-        for root, directories, files in os.walk("datasets/collect_frames_for_context".replace("/", os.sep)):
-            if root != "datasets/collect_frames_for_context".replace("/", os.sep):
+        for root, directories, files in os.walk("datasets/collect_frames_for_training".replace("/", os.sep)):
+            if root != "datasets/collect_frames_for_training".replace("/", os.sep):
                 break
 
             for directory in directories:
-                context_paths.append(f"datasets/collect_frames_for_context/{directory}".replace("/", os.sep))
+                context_paths.append(f"datasets/collect_frames_for_training/{directory}".replace("/", os.sep))
 
         if not len(context_paths):
             raise ContextClassifierError("No Context Frames found in 'datasets/collect_frames_for_datasets'...")
@@ -206,9 +206,9 @@ class ImageNetwork(ContextClassifier):
 
         frame = skimage.io.imread(frame_path)
 
-        imagenetwork = ImageNetwork(input_shape=frame.shape)
+        imagenetwork = ImageNetwork(input_shape=(60,80,3))
         imagenetwork.train(epochs=epochs, autosave=autosave, validate=validate)
         imagenetwork.validate()
 
-        ImageNetwork.save_classifier(imagenetwork, "datasets/context_classifier.model")
-        print("Success! Model was saved to 'datasets/context_classifier.model'")
+        ImageNetwork.save_classifier(imagenetwork, "datasets/pretrained_classifier.model")
+        print("Success! Model was saved to 'datasets/pretrained_classifier.model'")
