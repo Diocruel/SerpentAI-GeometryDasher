@@ -24,7 +24,7 @@ def action1():
         time.sleep(1)
 
 
-def action2():
+def record_audio():
     global FORMAT
     global defaultframes
     global recordtime
@@ -110,7 +110,7 @@ def action2():
         filename = "%s.wav" %framecounter
     
         wavefilepath = os.path.join(mydir, subdir, filename)
-        waveFile = wave.open(wavefilepath,'wb')
+        waveFile = wave.open(filename,'wb')
         waveFile.setnchannels(channelcount)
         waveFile.setsampwidth(p.get_sample_size(pyaudio.paInt16))
         waveFile.setframerate(int(device_info["defaultSampleRate"]))
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     
     jobs = []
     p1 = multiprocessing.Process(target=action1)
-    p2 = multiprocessing.Process(target=action2)
+    p2 = multiprocessing.Process(target=record_audio)
 
     jobs.append(p1)
     jobs.append(p2)
