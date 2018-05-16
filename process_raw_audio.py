@@ -35,11 +35,17 @@ def check_jump(string_to_check):
 
 if __name__ == "__main__":
     # Constants
-    audio_feature_length = 0.5  # in seconds
+    audio_feature_length = 500  # in milliseconds
     date_format = '%Y-%m-%d-%H-%M-%S-%f'  # in string format
 
+    # Create directories
+    process_time = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
+    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\"), exist_ok=True)
+    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time), exist_ok=True)
+    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time + "\\jump\\"), exist_ok=True)
+    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time + "\\no_jump\\"), exist_ok=True)
 
-    print("Processing raw audio")
+    print("Read in files ...")
     wav_files = []
     raw_audio_loc = os.getcwd() + "\\audio\\raw\\"
     wav_files = find_files(raw_audio_loc, wav_files, ".wav", False)
@@ -56,21 +62,62 @@ if __name__ == "__main__":
     # Get jump time stamps
     p_jump = Path(os.getcwd() + "\\audio\\raw\\timestamps.txt")
     jump_times = p_jump.read_text().splitlines()
-    jump_i = 0
-    print(jump_times[jump_i])
-    current_jump_time = datetime.datetime.strptime(jump_times[jump_i].split()[0], date_format)
-    print(str(current_jump_time))
 
+    print("Found " + str(len(wav_files)) + " sound fragments and " + str(len(jump_times)) + " frames timestamps.")
+
+    # Set first jump
+    jump_i = 0
+    current_jump_time = datetime.datetime.strptime(jump_times[jump_i].split()[0], date_format)
+    duration_fragments = datetime.timedelta(milliseconds=audio_feature_length)
+    current_jump_time_with_offset = current_jump_time + duration_fragments
+
+    frame_counter_j = 0
+    frame_counter_nj = 0
     # each audio file use start times to find first relevant jump action
     for i in range(0,len(wav_files)):
         # Read in audio
+        print("Create fragments for audio fragment " + str(i+1) + ", out of " + str(len(wav_files)))
         fragment = AudioSegment.from_wav(wav_files[i])
-        print(len(fragment))
+        fragment_duration = len(fragment)
+        fragment_end_time = start_times[i] + datetime.timedelta(milliseconds=fragment_duration)
+
 
         # Find start
-        while current_jump_time + audio_feature_length > start_times[i] & jump_i < len(jump_times):
-            pcurrent_jump_time = datetime.datetime.strptime(jump_times[jump_i].split()[0], date_format)
+        while (current_jump_time_with_offset < start_times[i]) & (jump_i < len(jump_times)):
             jump_i += 1
+            current_jump_time = datetime.datetime.strptime(jump_times[jump_i].split()[0], date_format)
+            current_jump_time_with_offset = current_jump_time + duration_fragments
+
+        while current_jump_time < fragment_end_time:
+            diff_start = current_jump_time - start_times[i] - duration_fragments
+            start_time_frame_ms = np.floor((diff_start.days * 86400000) + (diff_start.seconds * 1000) + (diff_start.microseconds / 1000))
+
+            # Print information about fragment
+            print("Timestamp " + str(current_jump_time))
+            print("Jump j/n: " + str(jump_times[jump_i].split()[1]))
+            print("Start audio frame " + str(start_times[i]))
+            print("Start time in ms: " + str(start_time_frame_ms))
+            print("end time in ms: " + str(start_time_frame_ms+audio_feature_length))
+            print("Duration in ms: " + str(start_time_frame_ms+audio_feature_length-start_time_frame_ms))
+            print(" ")
+
+            # Classify frame and write audio frame
+            frame = fragment[start_time_frame_ms:(start_time_frame_ms+audio_feature_length)]
+            if jump_times[jump_i].split()[1] == "j":
+                class_directory = "\\jump\\"
+                frame_counter_j += 1
+            else:
+                frame_counter_nj += 1
+                class_directory = "\\no_jump\\"
+            frame_counter = frame_counter_j + frame_counter_nj
+            frame.export(os.getcwd() + "\\datasets\\audio\\" + process_time + class_directory + str(frame_counter) + ".wav", format="wav")
+
+            # Update to next jump timestamp
+            jump_i += 1
+            current_jump_time = datetime.datetime.strptime(jump_times[jump_i].split()[0], date_format)
+            current_jump_time_with_offset = current_jump_time + duration_fragments
+    print("Done with " + str(wav_files) + ", created " + str(frame_counter_nj+frame_counter_j) + " frames, with " + str(frame_counter_j) +  " jump_frames and " + str(frame_counter_nj) + " no jump frames.")
+
 
 
     # fs1, y1 = scipy.io.wavfile.read(filename)
