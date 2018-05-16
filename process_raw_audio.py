@@ -78,7 +78,7 @@ if __name__ == "__main__":
     # each audio file use start times to find first relevant jump action
     for i in range(0,len(wav_files)):
         # Read in audio
-        print("Creating audio frames for audio fragment " + str(i+1) + ", out of " + str(len(wav_files)))
+        print("\tCreating audio frames for audio fragment " + str(i+1) + ", out of " + str(len(wav_files)))
         fragment = AudioSegment.from_wav(wav_files[i])
         fragment_duration = len(fragment)
         fragment_end_time = start_times[i] + datetime.timedelta(milliseconds=fragment_duration)
@@ -120,7 +120,7 @@ if __name__ == "__main__":
             current_jump_time_with_offset = current_jump_time + duration_fragments
 
         # Indicate that fragment is completed and update counters
-        print("Done with file number " + str(i + 1) + ", created " + str(frame_counter_nj+frame_counter_j) + " frames, with " + str(frame_counter_j) +  " jump_frames and " + str(frame_counter_nj) + " no jump frames.\n")
+        print("\tDone with file number " + str(i + 1) + ", created " + str(frame_counter_nj+frame_counter_j) + " frames, with " + str(frame_counter_j) +  " jump_frames and " + str(frame_counter_nj) + " no jump frames.\n")
         frame_counter_j_t += frame_counter_j
         frame_counter_j = 0
         frame_counter_nj_t += frame_counter_nj
