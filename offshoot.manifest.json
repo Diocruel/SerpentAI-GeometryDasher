@@ -44,6 +44,21 @@
             "config": {
                 "frame_handler": "PLAY"
             }
+        },
+        "SerpentRecorderGameAgentPlugin": {
+            "name": "SerpentRecorderGameAgentPlugin",
+            "version": "0.1.0",
+            "files": [
+                {
+                    "path": "serpent_Recorder_game_agent.py",
+                    "pluggable": "GameAgent"
+                }
+            ],
+            "plugins": [],
+            "libraries": [],
+            "config": {
+                "frame_handler": "PLAY"
+            }
         }
     }
 }
