@@ -73,6 +73,8 @@ if __name__ == "__main__":
 
     frame_counter_j = 0
     frame_counter_nj = 0
+    frame_counter_j_t = 0
+    frame_counter_nj_t = 0
     # each audio file use start times to find first relevant jump action
     for i in range(0,len(wav_files)):
         # Read in audio
@@ -93,13 +95,13 @@ if __name__ == "__main__":
             start_time_frame_ms = np.floor((diff_start.days * 86400000) + (diff_start.seconds * 1000) + (diff_start.microseconds / 1000))
 
             # Print information about fragment
-            print("Timestamp " + str(current_jump_time))
-            print("Jump j/n: " + str(jump_times[jump_i].split()[1]))
-            print("Start audio frame " + str(start_times[i]))
-            print("Start time in ms: " + str(start_time_frame_ms))
-            print("end time in ms: " + str(start_time_frame_ms+audio_feature_length))
-            print("Duration in ms: " + str(start_time_frame_ms+audio_feature_length-start_time_frame_ms))
-            print(" ")
+            # print("Timestamp " + str(current_jump_time))
+            # print("Jump j/n: " + str(jump_times[jump_i].split()[1]))
+            # print("Start audio frame " + str(start_times[i]))
+            # print("Start time in ms: " + str(start_time_frame_ms))
+            # print("end time in ms: " + str(start_time_frame_ms+audio_feature_length))
+            # print("Duration in ms: " + str(start_time_frame_ms+audio_feature_length-start_time_frame_ms))
+            # print(" ")
 
             # Classify frame and write audio frame
             frame = fragment[start_time_frame_ms:(start_time_frame_ms+audio_feature_length)]
@@ -116,8 +118,12 @@ if __name__ == "__main__":
             jump_i += 1
             current_jump_time = datetime.datetime.strptime(jump_times[jump_i].split()[0], date_format)
             current_jump_time_with_offset = current_jump_time + duration_fragments
-    print("Done with " + str(wav_files) + ", created " + str(frame_counter_nj+frame_counter_j) + " frames, with " + str(frame_counter_j) +  " jump_frames and " + str(frame_counter_nj) + " no jump frames.")
-
+        print("Done with " + str(wav_files) + ", created " + str(frame_counter_nj+frame_counter_j) + " frames, with " + str(frame_counter_j) +  " jump_frames and " + str(frame_counter_nj) + " no jump frames.")
+        frame_counter_j_t = frame_counter_j
+        frame_counter_j = 0
+        frame_counter_nj_t = frame_counter_nj
+        frame_counter_nj = 0
+    print("Done with all fragments. Created in total " + str(frame_counter_nj_t+frame_counter_j_t) + " frames, of which " + str(frame_counter_j_t) + " are jump frames and " + str(frame_counter_nj_t) +  " are non-jump frames.")
 
 
     # fs1, y1 = scipy.io.wavfile.read(filename)
