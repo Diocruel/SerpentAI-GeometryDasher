@@ -1,18 +1,20 @@
 import offshoot
 
 
-class SerpentGeometryDashGamePlugin(offshoot.Plugin):
-    name = "SerpentGeometryDashGamePlugin"
+class SerpentRecorderGameAgentPlugin(offshoot.Plugin):
+    name = "SerpentRecorderGameAgentPlugin"
     version = "0.1.0"
+
+    plugins = []
 
     libraries = []
 
     files = [
-        {"path": "serpent_GeometryDash_game.py", "pluggable": "Game"}
+        {"path": "serpent_Recorder_game_agent.py", "pluggable": "GameAgent"}
     ]
 
     config = {
-        "fps": 30
+        "frame_handler": "PLAY"
     }
 
     @classmethod
@@ -25,4 +27,4 @@ class SerpentGeometryDashGamePlugin(offshoot.Plugin):
 
 
 if __name__ == "__main__":
-    offshoot.executable_hook(SerpentGeometryDashGamePlugin)
+    offshoot.executable_hook(SerpentRecorderGameAgentPlugin)

@@ -19,32 +19,21 @@ class SerpentDasherGameAgent(GameAgent):
 
     def setup_play(self):
 
+        classifier_path = f"datasets/pretrained_classifier.model"
 
-        context_classifier_path = f"datasets/pretrained_classifier.model"
-
-        context_classifier = ImageNetwork(
+        classifier = ImageNetwork(
             input_shape=(60, 80, 3))  # Replace with the shape (rows, cols, channels) of your captured context frames
 
-        context_classifier.prepare_generators()
-        context_classifier.load_classifier(context_classifier_path)
+        classifier.load_classifier(classifier_path)
 
-        self.machine_learning_models["context_classifier"] = context_classifier
+        self.machine_learning_models["classifier"] = classifier
 
     def handle_play(self, game_frame):
-        print('Space is spressed: ',str(keyboard.is_pressed('space')))
 
-        # for i, game_frame in enumerate(self.game_frame_buffer.frames):
-        #     self.visual_debugger.store_image_data(
-        #         game_frame.frame,
-        #         game_frame.frame.shape,
-        #         str(i)
-        #     )
-        # self.input_controller.tap_key(KeyboardKey.KEY_UP)
         eightframe = game_frame.eighth_resolution_frame
         start = time()
-        context = self.machine_learning_models["context_classifier"].predict(eightframe)
+        prediction = self.machine_learning_models["classifier"].predict(eightframe)
         end = time()
-        if (context == 'jump') :
+        if (prediction == 1) :
             self.input_controller.tap_key(KeyboardKey.KEY_UP)
-        print(context)
         print("time : " + str(end-start))
