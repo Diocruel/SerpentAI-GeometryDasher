@@ -126,7 +126,8 @@ class SerpentDasherGameAgent(GameAgent):
         # Start audio recording
         p = multiprocessing.Process(target=record)
         p.start()
-        # Open audio time stamp file
+        # Reset audio - jump file
+        open(os.getcwd() + "\\audio\\raw\\timestamps.txt", 'w').close()
 
 
     def handle_play(self, game_frame):
@@ -137,11 +138,11 @@ class SerpentDasherGameAgent(GameAgent):
                 time.sleep(0.03)
                 if not (key_pressed or old_key_pressed):
                     frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
-                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n\n")
+                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j\n")
                     # print("Writing to no_jump")
                 else:
                     frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
-                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j\n")
+                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n\n")
                     # print("Writing to jump")
             else:
                 frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
