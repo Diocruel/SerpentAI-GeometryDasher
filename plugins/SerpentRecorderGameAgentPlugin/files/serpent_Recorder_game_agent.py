@@ -39,31 +39,27 @@ class SerpentRecorderGameAgent(GameAgent):
         pass
 
     def handle_play(self, game_frame):
-        #filename = os.getcwd() + "\\datasets\\collect_frames\\replay.png"
-        #image= Image.open(filename)
-        #image = np.array(image)
-        #image_data = image[...,np.newaxis]
-        #sprite = Sprite("GameOver", image_data=image_data)
-        #sprite.append_image_data(image_data)
-        #sprite_name = self.sprite_identifier.identify(sprite, mode="SIGNATURE_COLORS")
-        #if sprite_name != "UNKNOWN":
-        #    print(sprite_name)
+        full_frame = game_frame.frame
+        image_data = full_frame[...,np.newaxis]
+        query_sprite = Sprite("QUERY",image_data = image_data)
         
-        #insert method to check context
+        sprite_name = self.identify_by_signature_colors(query_sprite)
+
         global RemovedB
         global frame_count
         global timestamp
         global removeFramesFilePath
-        if frame_count%20 != 0:
+
+        if sprite_name == "UNKNOWN":
             RemovedB = False
             def save_game_frame(frame,frame_cnt):
             
                 if not (key_pressed or old_key_pressed):
                     frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
-                    #print("Writing to no_jump")
+                    print("Writing to no_jump")
                 else:
                     frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
-                    #print("Writing to jump")
+                    print("Writing to jump")
           
             global key_pressed
         
@@ -82,12 +78,29 @@ class SerpentRecorderGameAgent(GameAgent):
             thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
             frame_count += 1
         else:
+            print('Gameover')
             if not RemovedB:
                 RemovedB = True
                 print(frame_count)
                 removeFramesFile = open(removeFramesFilePath,"a+")
                 removeFramesFile.write(str(frame_count)+"\n")
-            #ONLY FOR TESTING SHOULD BE REMOVED LATER
-            frame_count +=1       
+                
+        #    #ONLY FOR TESTING SHOULD BE REMOVED LATER
+        #    frame_count +=1       
                     
-        
+    def identify_by_signature_colors(self, query_sprite, score_threshold=25, debug=False):
+        top_sprite_score = 0
+        top_sprite_match = None
+
+        for sprite_name, sprite in self.game.sprites.items():
+            for sprite_signature_colors in sprite.signature_colors:
+                for query_sprite_signature_colors in query_sprite.signature_colors:
+                    signature_color_score = int((len(query_sprite_signature_colors & sprite_signature_colors) / len(sprite_signature_colors)) * 100)
+
+                    if debug:
+                        print(sprite_name, signature_color_score)
+
+                    if signature_color_score > top_sprite_score:
+                        top_sprite_score = signature_color_score
+                        top_sprite_match = sprite_name
+        return top_sprite_match if top_sprite_score >= score_threshold else "UNKNOWN"
