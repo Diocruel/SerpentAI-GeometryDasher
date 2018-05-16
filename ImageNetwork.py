@@ -122,9 +122,6 @@ class ImageNetwork(ContextClassifier):
         pass
 
     def predict(self, input_frame):
-        if self.training_generator is None or self.validation_generator is None:
-            self.prepare_generators()
-
         source_min = 0
 
         if str(input_frame.dtype) == "uint8":
@@ -140,7 +137,6 @@ class ImageNetwork(ContextClassifier):
             target_max=1
         ), dtype="float32")
 
-        class_mapping = self.training_generator.class_indices
         class_probabilities = self.classifier.predict(input_frame[None, :, :, :])[0]
 
         max_probability_index = np.argmax(class_probabilities)
@@ -149,9 +145,8 @@ class ImageNetwork(ContextClassifier):
         if max_probability < 0.5:
             return None
 
-        for class_name, i in class_mapping.items():
-            if i == max_probability_index:
-                return class_name
+        return max_probability_index
+
 
     def save_classifier(self, file_path):
         if self.classifier is not None:
