@@ -1,12 +1,5 @@
 import librosa
 import numpy as np
-import scipy
-from keras import losses, models, optimizers
-from keras.activations import relu, softmax
-from keras.callbacks import (EarlyStopping, LearningRateScheduler,
-                             ModelCheckpoint, TensorBoard, ReduceLROnPlateau)
-from keras.layers import (Convolution1D, Dense, Dropout, GlobalAveragePooling1D, 
-                          GlobalMaxPool1D, Input, MaxPool1D, concatenate)
 from keras.utils import Sequence, to_categorical
 
 class Config(object):
@@ -51,7 +44,7 @@ class DataGenerator(Sequence):
         min_data = np.min(data)
         data = (data-min_data)/(max_data-min_data+1e-6)
         return data-0.5
-        
+
     def __data_generation(self, list_IDs_temp):
         cur_batch_size = len(list_IDs_temp)
         X = np.empty((cur_batch_size, *self.dim))
