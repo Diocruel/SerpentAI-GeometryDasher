@@ -138,11 +138,11 @@ class SerpentDasherGameAgent(GameAgent):
                 time.sleep(0.03)
                 if not (key_pressed or old_key_pressed):
                     frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
-                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j\n")
+                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n\n")
                     # print("Writing to no_jump")
                 else:
                     frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
-                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n\n")
+                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j\n")
                     # print("Writing to jump")
             else:
                 frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
