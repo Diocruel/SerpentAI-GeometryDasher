@@ -1,13 +1,5 @@
 import librosa
 import numpy as np
-import scipy
-from keras import losses, models, optimizers
-from keras.activations import relu, softmax
-from keras.callbacks import (EarlyStopping, LearningRateScheduler,
-                             ModelCheckpoint, TensorBoard, ReduceLROnPlateau)
-from keras.layers import (Convolution1D, Dense, Dropout, GlobalAveragePooling1D, 
-                          GlobalMaxPool1D, Input, MaxPool1D, concatenate)
-from keras.utils import Sequence, to_categorical
 
 class Config(object):
     def __init__(self,

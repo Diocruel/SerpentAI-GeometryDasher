@@ -3,16 +3,9 @@ from serpent.machine_learning.context_classification.context_classifier import C
 from serpent.utilities import SerpentError
 
 try:
-    from keras.applications.inception_v3 import InceptionV3, preprocess_input
-    from keras.layers import (Input, Dense, GlobalAveragePooling2D, Convolution2D,
-                              BatchNormalization, Flatten, GlobalMaxPool2D, MaxPool2D,
-                              concatenate, Activation)
+    from keras.layers import (Input, Dense, Convolution1D, GlobalMaxPool1D, Dropout)
     from keras.models import Model, load_model
     from keras.callbacks import ModelCheckpoint
-    from keras.utils import Sequence, to_categorical
-    from keras import backend as K
-
-
 
 except ImportError:
     raise SerpentError("Setup has not been been performed for the ML module. Please run 'serpent setup ml'")
@@ -24,15 +17,13 @@ import numpy as np
 import random
 import os
 import shutil
-import IPython
-import pandas as pd
-# To load and read audio files
+# # To load and read audio files
 import librosa
 SAMPLE_RATE = 44100
 from Config import Config, DataGenerator
 
 class ContextClassifierError(BaseException):
-    pass
+     pass
 
 class AudioNetwork(ContextClassifier):
 
@@ -168,7 +159,7 @@ class AudioNetwork(ContextClassifier):
                 context_paths.append(f"datasets/audio/collect_frames_for_training/{directory}".replace("/", os.sep))
 
         if not len(context_paths):
-            raise ContextClassifierError("No Context Frames found in 'datasets/audio/collect_frames_for_datasets'...")
+            raise ContextClassifierError("No Context Frames found in 'datasets/audio/collect_frames_for_training'...")
 
         serpent.datasets.create_training_and_validation_sets(context_paths)
 
@@ -183,8 +174,8 @@ class AudioNetwork(ContextClassifier):
             if frame_path is not None:
                 break
 
-        frame, _ = librosa.core.load(frame_path, sr=SAMPLE_RATE)
-        frame.shape
+        #frame, _ = librosa.core.load(frame_path, sr=SAMPLE_RATE)
+        #frame.shape
 	
         config = Config(sampling_rate=SAMPLE_RATE, audio_duration=2, use_mfcc=False)
         audionetwork = AudioNetwork(input_shape=(config.audio_length, 1))
