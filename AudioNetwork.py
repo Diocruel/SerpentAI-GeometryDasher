@@ -143,8 +143,7 @@ class AudioNetwork(ContextClassifier):
 	
 	
     def prepare_generators(self):
-		
-		self.training_generator = DataGenerator(config, 'datasets/audio/collect_frames_for_training', train_set.index, 
+        self.training_generator = DataGenerator(config, 'datasets/audio/collect_frames_for_training', train_set.index, 
                                     train_set.label_idx, batch_size=32,
                                     preprocessing_fn=audio_norm)
         self.validation_generator = DataGenerator(config, 'datasets/audio/collect_frames_for_training', val_set.index, 
