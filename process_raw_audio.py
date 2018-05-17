@@ -84,13 +84,13 @@ if __name__ == "__main__":
         fragment_end_time = start_times[i] + datetime.timedelta(milliseconds=fragment_duration)
 
         # Find first possible starting frame
-        while (current_jump_time_with_offset < start_times[i]) & (jump_i < len(jump_times)):
+        while (current_jump_time_with_offset < start_times[i]) & (jump_i < len(jump_times) - 1):
             jump_i += 1
             current_jump_time = datetime.datetime.strptime(jump_times[jump_i].split()[0], date_format)
             current_jump_time_with_offset = current_jump_time + duration_fragments
 
         # Label all frames within audio fragment
-        while (current_jump_time < fragment_end_time) & (jump_i < len(jump_times)):
+        while (current_jump_time < fragment_end_time) & (jump_i < len(jump_times) - 1):
             diff_start = current_jump_time - start_times[i] - duration_fragments
             start_time_frame_ms = np.floor((diff_start.days * 86400000) + (diff_start.seconds * 1000) + (diff_start.microseconds / 1000))
 
