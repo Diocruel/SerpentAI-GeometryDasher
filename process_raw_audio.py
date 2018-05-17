@@ -35,7 +35,7 @@ def check_jump(string_to_check):
 
 if __name__ == "__main__":
     # Constants
-    audio_feature_length = 500  # in milliseconds
+    audio_feature_length = 2000  # in milliseconds
     date_format = '%Y-%m-%d-%H-%M-%S-%f'  # in string format based on agent settings
 
     # Create directories
@@ -112,7 +112,7 @@ if __name__ == "__main__":
                 frame_counter_nj += 1
                 class_directory = "\\no_jump\\"
             frame_counter = frame_counter_j + frame_counter_nj
-            frame.export(os.getcwd() + "\\datasets\\audio\\" + process_time + class_directory + str(frame_counter) + ".wav", format="wav")
+            frame.export(os.getcwd() + "\\datasets\\audio\\" + process_time + class_directory + str(i+1)+ "_" +str(frame_counter) + ".wav", format="wav")
 
             # Update to next jump timestamp
             jump_i += 1
