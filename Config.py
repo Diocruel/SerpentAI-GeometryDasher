@@ -39,12 +39,6 @@ class DataGenerator(Sequence):
     def on_epoch_end(self):
         self.indexes = np.arange(len(self.list_IDs))
 	
-    def audio_norm(data):
-        max_data = np.max(data)
-        min_data = np.min(data)
-        data = (data-min_data)/(max_data-min_data+1e-6)
-        return data-0.5
-
     def __data_generation(self, list_IDs_temp):
         cur_batch_size = len(list_IDs_temp)
         X = np.empty((cur_batch_size, *self.dim))
@@ -82,7 +76,10 @@ class DataGenerator(Sequence):
         if self.labels is not None:
             y = np.empty(cur_batch_size, dtype=int)
             for i, ID in enumerate(list_IDs_temp):
-                y[i] = self.labels[ID]
-            return X, to_categorical(y, num_classes=self.config.n_classes)
+                if ID=='jump':
+                    y[i] = 0
+                else:
+                    y[i] = 1
+            return X, to_categorical(y, num_classes=2)
         else:
             return X
