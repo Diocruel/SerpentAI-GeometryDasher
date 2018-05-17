@@ -127,4 +127,4 @@ if __name__ == "__main__":
         frame_counter_nj = 0
     print("Done with all fragments. Created in total " + str(frame_counter_nj_t+frame_counter_j_t) + " frames, of which " + str(frame_counter_j_t) + " are jump frames and " + str(frame_counter_nj_t) +  " are non-jump frames.")
     print("Output can be found in: " + str(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time)))
-    print("Do not forget to delete the raw data folder before recording!")
+    print("Do not forget to delete the audio in raw data folder before recording!")
