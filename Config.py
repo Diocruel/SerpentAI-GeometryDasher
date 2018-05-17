@@ -46,12 +46,12 @@ class DataGenerator(Sequence):
     def on_epoch_end(self):
         self.indexes = np.arange(len(self.list_IDs))
 	
-	def audio_norm(data):
-		max_data = np.max(data)
-		min_data = np.min(data)
-		data = (data-min_data)/(max_data-min_data+1e-6)
-		return data-0.5
-		
+    def audio_norm(data):
+        max_data = np.max(data)
+        min_data = np.min(data)
+        data = (data-min_data)/(max_data-min_data+1e-6)
+        return data-0.5
+        
     def __data_generation(self, list_IDs_temp):
         cur_batch_size = len(list_IDs_temp)
         X = np.empty((cur_batch_size, *self.dim))
