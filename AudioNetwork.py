@@ -3,7 +3,6 @@ from serpent.machine_learning.context_classification.context_classifier import C
 from serpent.utilities import SerpentError
 
 try:
-    from keras.preprocessing.image import ImageDataGenerator
     from keras.applications.inception_v3 import InceptionV3, preprocess_input
     from keras.layers import (Input, Dense, GlobalAveragePooling2D, Convolution2D,
                               BatchNormalization, Flatten, GlobalMaxPool2D, MaxPool2D,
@@ -24,11 +23,18 @@ import serpent.cv
 import numpy as np
 import random
 import os
+import shutil
+import IPython
+import pandas as pd
+# To load and read audio files
+import librosa
+SAMPLE_RATE = 44100
+from Config import Config, DataGenerator
 
 class ContextClassifierError(BaseException):
     pass
 
-class ImageNetwork(ContextClassifier):
+class AudioNetwork(ContextClassifier):
 
     def __init__(self, input_shape=None):
         super().__init__()
@@ -41,56 +47,36 @@ class ImageNetwork(ContextClassifier):
         if validate and (self.training_generator is None or self.validation_generator is None):
             self.prepare_generators()
 
-        #Not sure what this input shoul be, Input() is not working
-        #self.input_shape gives an error it should be a tensor.
-        #serpent give some input stuff from exsisting model, not sure how this works
 
-        inp = Input(shape=self.input_shape)
-        #inp = self.input_shape
-        x = Convolution2D(32, (8, 8), strides=4, padding="same")(inp)
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
-        x = MaxPool2D()(x)
+        inp = Input(shape==self.input_shape)
+        x = Convolution1D(16, 9, activation=relu, padding="valid")(inp)
+        x = Convolution1D(16, 9, activation=relu, padding="valid")(x)
+        x = MaxPool1D(16)(x)
+        x = Dropout(rate=0.1)(x)
+    
+        x = Convolution1D(32, 3, activation=relu, padding="valid")(x)
+        x = Convolution1D(32, 3, activation=relu, padding="valid")(x)
+        x = MaxPool1D(4)(x)
+        x = Dropout(rate=0.1)(x)
+    
+        x = Convolution1D(32, 3, activation=relu, padding="valid")(x)
+        x = Convolution1D(32, 3, activation=relu, padding="valid")(x)
+        x = MaxPool1D(4)(x)
+        x = Dropout(rate=0.1)(x)
+		
+        x = Convolution1D(256, 3, activation=relu, padding="valid")(x)
+        x = Convolution1D(256, 3, activation=relu, padding="valid")(x)
+        x = GlobalMaxPool1D()(x)
+        x = Dropout(rate=0.2)(x)
 
-        x = Convolution2D(64, (4, 4), strides=2, padding="same")(x)
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
-        x = MaxPool2D()(x)
-
-        x = Convolution2D(64, (3, 3), strides=1, padding="same")(x)
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
-        x = MaxPool2D()(x)
-
-        x = Flatten()(x)
-        x = Dense(64)(x)
-        x = BatchNormalization()(x)
-        x = Activation("relu")(x)
-
+        x = Dense(64, activation=relu)(x)
+        x = Dense(1028, activation=relu)(x)
+		
         predictions = Dense(len(self.training_generator.class_indices), activation='softmax')(x)
         self.classifier = Model(inputs=inp, outputs=predictions)
 
-
-
-       #This loads an existing model, thats why you need 3 channels. We want our own model
-       # base_model = InceptionV3(
-       #     weights="imagenet",
-       #     include_top=False,
-       #     input_shape=self.input_shape
-       # )
-
-        #output = base_model.output
-        #output = GlobalAveragePooling2D()(output)
-        #output = Dense(1024, activation='relu')(output)
-
-        #predictions = Dense(len(self.training_generator.class_indices), activation='softmax')(output)
-        #self.classifier = Model(inputs=base_model.input, outputs=predictions)
-
-        #for layer in base_model.layers:
-        #    layer.trainable = False
-
         self.classifier.compile(
-            optimizer="rmsprop",
+            optimizer="adam",
             loss="categorical_crossentropy",
             metrics=["accuracy"]
         )
@@ -99,7 +85,7 @@ class ImageNetwork(ContextClassifier):
 
         if autosave:
             callbacks.append(ModelCheckpoint(
-                "datasets/context_classifier_{epoch:02d}-{val_loss:.2f}.model",
+                "datasets/audio_classifier_{epoch:02d}-{val_loss:.2f}.model",
                 monitor='val_loss',
                 verbose=0,
                 save_best_only=False,
@@ -154,37 +140,36 @@ class ImageNetwork(ContextClassifier):
 
     def load_classifier(self, file_path):
         self.classifier = load_model(file_path)
-
+	
+	
     def prepare_generators(self):
-        training_data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
-        validation_data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
-
-        self.training_generator = training_data_generator.flow_from_directory(
-            "datasets/current/training",
-            target_size=(self.input_shape[0], self.input_shape[1]),
-            batch_size=32
-        )
-
-        self.validation_generator = validation_data_generator.flow_from_directory(
-            "datasets/current/validation",
-            target_size=(self.input_shape[0], self.input_shape[1]),
-            batch_size=32
-        )
+		
+		self.training_generator = DataGenerator(config, 'datasets/audio/collect_frames_for_training', train_set.index, 
+                                    train_set.label_idx, batch_size=32,
+                                    preprocessing_fn=audio_norm)
+        self.validation_generator = DataGenerator(config, 'datasets/audio/collect_frames_for_training', val_set.index, 
+                                    val_set.label_idx, batch_size=32,
+                                    preprocessing_fn=audio_norm)
+        
+        
+		
+		
+	
 
 
 
-    def executable_train(epochs=3, autosave=False, classifier="ImageNetwork", validate=True):
+    def executable_train(epochs=3, autosave=False, classifier="AudioNetwork", validate=True):
         context_paths = list()
 
-        for root, directories, files in os.walk("datasets/collect_frames_for_training".replace("/", os.sep)):
-            if root != "datasets/collect_frames_for_training".replace("/", os.sep):
+        for root, directories, files in os.walk("datasets/audio/collect_frames_for_training".replace("/", os.sep)):
+            if root != "datasets/audio/collect_frames_for_training".replace("/", os.sep):
                 break
 
             for directory in directories:
-                context_paths.append(f"datasets/collect_frames_for_training/{directory}".replace("/", os.sep))
+                context_paths.append(f"datasets/audio/collect_frames_for_training/{directory}".replace("/", os.sep))
 
         if not len(context_paths):
-            raise ContextClassifierError("No Context Frames found in 'datasets/collect_frames_for_datasets'...")
+            raise ContextClassifierError("No Context Frames found in 'datasets/audio/collect_frames_for_datasets'...")
 
         serpent.datasets.create_training_and_validation_sets(context_paths)
 
@@ -193,17 +178,19 @@ class ImageNetwork(ContextClassifier):
 
         for root, directories, files in os.walk(context_path):
             for file in files:
-                if file.endswith(".png"):
+                if file.endswith(".wav"):
                     frame_path = f"{context_path}/{file}"
                     break
             if frame_path is not None:
                 break
 
-        frame = skimage.io.imread(frame_path)
+        frame, _ = librosa.core.load(frame_path, sr=SAMPLE_RATE)
+        frame.shape
+	
+        config = Config(sampling_rate=SAMPLE_RATE, audio_duration=2, use_mfcc=False)
+        audionetwork = AudioNetwork(input_shape=(config.audio_length, 1))
+        audionetwork.train(epochs=epochs, autosave=autosave, validate=validate)
+        audionetwork.validate()
 
-        imagenetwork = ImageNetwork(input_shape=(60,80,3))
-        imagenetwork.train(epochs=epochs, autosave=autosave, validate=validate)
-        imagenetwork.validate()
-
-        ImageNetwork.save_classifier(imagenetwork, "datasets/pretrained_classifier.model")
-        print("Success! Model was saved to 'datasets/pretrained_classifier.model'")
+        AudioNetwork.save_classifier(audionetwork, "datasets/pretrained_audio_classifier.model")
+        print("Success! Model was saved to 'datasets/pretrained_audio_classifier.model'")
