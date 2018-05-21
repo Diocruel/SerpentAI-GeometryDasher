@@ -56,7 +56,7 @@ class SerpentRecorderGameAgent(GameAgent):
                 frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
                 #print("Writing to no_jump")
             else:
-                frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
+                frame.save("datasets\\" + timestamp + "\\yes_jump\\" + str(frame_cnt) + ".png")
                 #print("Writing to jump")
 
         global timestamp
