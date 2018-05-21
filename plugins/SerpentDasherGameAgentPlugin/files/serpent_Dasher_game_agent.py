@@ -37,6 +37,6 @@ class SerpentDasherGameAgent(GameAgent):
         prediction = self.machine_learning_models["classifier"].predict(small_im)
         end = time()
         print(prediction)
-        if (prediction == 0) :
+        if (prediction == 1) :
             self.input_controller.tap_key(KeyboardKey.KEY_UP)
         #print("time : " + str(end-start))

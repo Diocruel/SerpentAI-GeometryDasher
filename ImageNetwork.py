@@ -132,7 +132,7 @@ class ImageNetwork(ContextClassifier):
             nb_epoch=epochs,
             validation_data=self.validation_generator,
             nb_val_samples=self.validation_sample_count,
-            class_weight={0:100,1:1},
+            class_weight={0:1,1:200},
             callbacks=callbacks
         )
 
