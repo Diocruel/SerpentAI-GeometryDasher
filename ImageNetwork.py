@@ -1,6 +1,6 @@
 from serpent.machine_learning.context_classification.context_classifier import ContextClassifier
-
 from serpent.utilities import SerpentError
+import tensorflow as tf
 
 try:
     from keras.preprocessing.image import ImageDataGenerator
@@ -12,6 +12,7 @@ try:
     from keras.callbacks import ModelCheckpoint
     from keras.utils import Sequence, to_categorical
     from keras import backend as K
+    from keras.callbacks import Callback
 
 
 
@@ -24,6 +25,23 @@ import serpent.cv
 import numpy as np
 import random
 import os
+
+def auc_roc(y_true, y_pred):
+    # any tensorflow metric
+    value, update_op = tf.contrib.metrics.streaming_auc(y_pred, y_true)
+
+    # find all variables created for this metric
+    metric_vars = [i for i in tf.local_variables() if 'auc_roc' in i.name.split('/')[1]]
+
+    # Add metric variables to GLOBAL_VARIABLES collection.
+    # They will be initialized for new session.
+    for v in metric_vars:
+        tf.add_to_collection(tf.GraphKeys.GLOBAL_VARIABLES, v)
+
+    # force to update metric values
+    with tf.control_dependencies([update_op]):
+        value = tf.identity(value)
+        return value
 
 class ContextClassifierError(BaseException):
     pass
@@ -92,7 +110,7 @@ class ImageNetwork(ContextClassifier):
         self.classifier.compile(
             optimizer="rmsprop",
             loss="categorical_crossentropy",
-            metrics=["accuracy"]
+            metrics=["accuracy", auc_roc]
         )
 
         callbacks = []
@@ -114,7 +132,7 @@ class ImageNetwork(ContextClassifier):
             nb_epoch=epochs,
             validation_data=self.validation_generator,
             nb_val_samples=self.validation_sample_count,
-            class_weight="auto",
+            class_weight={0:100,1:1},
             callbacks=callbacks
         )
 
@@ -153,7 +171,7 @@ class ImageNetwork(ContextClassifier):
             self.classifier.save(file_path)
 
     def load_classifier(self, file_path):
-        self.classifier = load_model(file_path)
+        self.classifier = load_model(file_path, custom_objects={'auc_roc': auc_roc})
 
     def prepare_generators(self):
         training_data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
