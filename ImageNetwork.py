@@ -109,7 +109,7 @@ class ImageNetwork(ContextClassifier):
 
         self.classifier.compile(
             optimizer="rmsprop",
-            loss="categorical_crossentropy",
+            loss="binary_crossentropy",
             metrics=["accuracy", auc_roc]
         )
 
