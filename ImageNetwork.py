@@ -7,7 +7,7 @@ try:
     from keras.applications.inception_v3 import InceptionV3, preprocess_input
     from keras.layers import (Input, Dense, GlobalAveragePooling2D, Convolution2D,
                               BatchNormalization, Flatten, GlobalMaxPool2D, MaxPool2D,
-                              concatenate, Activation)
+                              concatenate, Activation, Dropout)
     from keras.models import Model, load_model
     from keras.callbacks import ModelCheckpoint
     from keras.utils import Sequence, to_categorical
@@ -65,23 +65,39 @@ class ImageNetwork(ContextClassifier):
 
         inp = Input(shape=self.input_shape)
         #inp = self.input_shape
-        x = Convolution2D(32, (8, 8), strides=4, padding="same")(inp)
+        x = Convolution2D(32, (8, 8), strides=1, padding="same")(inp)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
         x = MaxPool2D()(x)
+        x = Dropout(0.25)(x)
 
-        x = Convolution2D(64, (4, 4), strides=2, padding="same")(x)
+        x = Convolution2D(64, (4, 4), strides=1, padding="same")(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
         x = MaxPool2D()(x)
+        x = Dropout(0.25)(x)
 
         x = Convolution2D(64, (3, 3), strides=1, padding="same")(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
         x = MaxPool2D()(x)
+        x = Dropout(0.25)(x)
+
+        x = Convolution2D(128, (2, 2), strides=1, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        x = MaxPool2D()(x)
+        x = Dropout(0.25)(x)
+
+        x = Convolution2D(256, (2, 2), strides=1, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        x = MaxPool2D()(x)
+        x = Dropout(0.25)(x)
 
         x = Flatten()(x)
-        x = Dense(64)(x)
+        x = Dense(256)(x)
+        x = Dropout(0.25)(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
 
@@ -132,7 +148,7 @@ class ImageNetwork(ContextClassifier):
             nb_epoch=epochs,
             validation_data=self.validation_generator,
             nb_val_samples=self.validation_sample_count,
-            class_weight={0:1,1:200},
+            class_weight={0:1,1:250},
             callbacks=callbacks
         )
 

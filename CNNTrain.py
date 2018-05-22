@@ -13,4 +13,4 @@ def train(epochs=3, validate=True, autosave=False):
     ImageNetwork.executable_train(epochs=int(epochs), validate=validate, autosave=autosave)
 
 if __name__ == '__main__':
-    train(10,True,False)
+    train(1000,True,False)
