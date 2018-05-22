@@ -1,6 +1,9 @@
 SerpentDasherGameAgentPlugin:
   frame_handler: PLAY
 SerpentGeometryDashGamePlugin:
-  fps: 2
+  fps: 30
+SerpentRecorderGameAgentPlugin:
+  frame_handler: PLAY
+
 SerpentexitGamePlugin:
-  fps: 2
+  fps: 30

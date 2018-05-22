@@ -12,7 +12,7 @@ class SerpentexitGamePlugin(offshoot.Plugin):
     ]
 
     config = {
-        "fps": 2
+        "fps": 10
     }
 
     @classmethod
