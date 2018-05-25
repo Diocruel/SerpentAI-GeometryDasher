@@ -53,7 +53,9 @@ class SerpentRecorderGameAgent(GameAgent):
         prediction = self.machine_learning_models["context_classifier"].predict(game_frame.frame)
         global frame_count
         global timestamp
-        
+        global key_pressed
+        old_key_pressed = key_pressed
+        key_pressed = keyboard.is_pressed('space')
         
         if prediction != 1:
             RemovedB = False
@@ -66,7 +68,7 @@ class SerpentRecorderGameAgent(GameAgent):
                     frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
                     print("Writing to jump")
           
-            global key_pressed
+            
         
             #Visual debugger
             for i, game_frame in enumerate(self.game_frame_buffer.frames):
@@ -78,8 +80,6 @@ class SerpentRecorderGameAgent(GameAgent):
         
             small_im = game_frame.eighth_resolution_frame
             gray_im = Image.fromarray(small_im).convert("L")
-            old_key_pressed = key_pressed
-            key_pressed = keyboard.is_pressed('space')
             thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
             frame_count += 1
         else:
