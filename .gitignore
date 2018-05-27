@@ -1,5 +1,6 @@
 # Datasets
-datasets/
+/datasets/*
+!/datasets/context_classifier.model
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
