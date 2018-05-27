@@ -106,6 +106,7 @@ class SerpentRecorderGameAgent(GameAgent):
     global frame_count
     global key_pressed
     global audio_file
+    global audio_thread
 
     timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
     frame_count = 0
@@ -126,6 +127,7 @@ class SerpentRecorderGameAgent(GameAgent):
 
     def setup_play(self):
         global audio_file
+        global audio_thread
 
         context_classifier_path = f"datasets/context_classifier.model"
 
@@ -137,8 +139,8 @@ class SerpentRecorderGameAgent(GameAgent):
         self.machine_learning_models["context_classifier"] = context_classifier
 
         # Start audio recording
-        p = multiprocessing.Process(target=record)
-        p.start()
+        audio_thread = multiprocessing.Process(target=record)
+        audio_thread.start()
         # Reset audio - jump file
         open(os.getcwd() + "\\audio\\raw\\timestamps.txt", 'w').close()
 
@@ -166,6 +168,7 @@ class SerpentRecorderGameAgent(GameAgent):
         global frame_count
         global key_pressed
         global audio_file
+        global audio_thread
 
         # #Visual debugger
         # for i, game_frame in enumerate(self.game_frame_buffer.frames):
@@ -181,3 +184,8 @@ class SerpentRecorderGameAgent(GameAgent):
         key_pressed = keyboard.is_pressed('space')
         thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
         frame_count += 1
+
+        # Check for close key press. Wait till audio thread is done writing and close all processes after.
+        if keyboard.is_pressed('q'):
+            audio_thread.join()
+            sys.exit()
