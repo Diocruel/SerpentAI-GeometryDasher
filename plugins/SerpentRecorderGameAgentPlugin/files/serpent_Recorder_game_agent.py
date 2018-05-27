@@ -126,7 +126,7 @@ class SerpentRecorderGameAgent(GameAgent):
 
     def setup_play(self):
         global audio_file
-        
+
         context_classifier_path = f"datasets/context_classifier.model"
 
         context_classifier = ImageNetwork(
