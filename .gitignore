@@ -2,6 +2,7 @@
 datasets/
 audio/
 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -104,6 +105,5 @@ ENV/
 # mypy
 .mypy_cache/
 *.png
-*.model
 *.xml
 *.iml
