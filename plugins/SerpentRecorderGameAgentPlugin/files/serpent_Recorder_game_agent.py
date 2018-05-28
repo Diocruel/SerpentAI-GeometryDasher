@@ -39,7 +39,7 @@ class SerpentRecorderGameAgent(GameAgent):
         
 
     def setup_play(self):
-        context_classifier_path = f"datasets/context_classifier.model"
+        context_classifier_path = f"plugins/SerpentRecorderGameAgentPlugin/files/ml_models/context_classifier.model"
 
         context_classifier = ImageNetwork(
             input_shape=(60, 80, 3))  # Replace with the shape (rows, cols, channels) of your captured context frames
