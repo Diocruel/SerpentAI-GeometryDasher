@@ -191,7 +191,7 @@ class AudioNetwork(ContextClassifier):
                 context_paths.append(f"datasets/audio/collect_frames_for_training/{directory}".replace("/", os.sep))
 
         if not len(context_paths):
-            raise ContextClassifierError("No Context Frames found in 'datasets/audio/collect_frames_for_datasets'...")
+            raise ContextClassifierError("No Context Frames found in 'datasets/audio/collect_frames_for_training'...")
 
         serpent.datasets.create_training_and_validation_sets(context_paths)
 
