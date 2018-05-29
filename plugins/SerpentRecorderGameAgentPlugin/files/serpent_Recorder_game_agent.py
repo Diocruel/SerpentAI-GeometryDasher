@@ -97,7 +97,6 @@ def record():
     print("finished recording")
 
     # stop Recording
-    stream.stop_stream()
     stream.close()
     p.terminate()
 
