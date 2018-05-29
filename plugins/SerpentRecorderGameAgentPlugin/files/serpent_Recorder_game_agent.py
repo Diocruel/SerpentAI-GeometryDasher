@@ -169,7 +169,6 @@ class SerpentRecorderGameAgent(GameAgent):
 
         old_key_pressed = key_pressed
         key_pressed = keyboard.is_pressed('space')
-        frame_count += 1
         
         if prediction != 1:
             RemovedB = False

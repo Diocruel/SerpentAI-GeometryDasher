@@ -33,11 +33,47 @@ def check_jump(string_to_check):
         return false
 
 
+def delete_death_frames(no_frames_to_delete):
+    print("First deleting all death frames. \n")
+    # Read in lines
+    f = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", "r")
+    lines = f.readlines()
+    f.close()
+
+    # Read in death frames
+    f_death = []
+    f_death = find_files("\\datasets\\remove", f_death, ".txt", False)
+    f_death = open(f_death[0])
+    death_frames = f_death.readline()
+    f_death.close()
+
+    # Put death frames into a dictionary
+    death_dict = {}
+    for death_frame in death_frames:
+        death_dict[death_frame] = '0'
+
+    # Go over a lines and remove death frames and frames leading to death frame
+    for line in lines:
+        frame_number = line.split()[2]
+
+        # Check if frame is death frame
+        if frame_number in death_dict:
+            # Remove last no_frames_to_delete frames
+            for current_frame_number in range(max(0,frame_number-10),frame_number+1):
+                pass
+
+
+
+
 if __name__ == "__main__":
     # Constants
     audio_feature_length = 2000  # in milliseconds
     date_format = '%Y-%m-%d-%H-%M-%S-%f'  # in string format based on agent settings
+    no_frames_to_delete = 10 # Number of frames to delete on death frames
 
+    # Delete death frames from timestamp.txt
+    delete_death_frames(no_frames_to_delete)
+    raise SystemExit(0)
     # Create directories
     process_time = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\"), exist_ok=True)
@@ -45,7 +81,7 @@ if __name__ == "__main__":
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time + "\\jump\\"), exist_ok=True)
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time + "\\no_jump\\"), exist_ok=True)
 
-    print("Reading in files ...")
+    print("Reading in audio files ...")
     wav_files = []
     raw_audio_loc = os.getcwd() + "\\audio\\raw\\"
     wav_files = find_files(raw_audio_loc, wav_files, ".wav", False)
