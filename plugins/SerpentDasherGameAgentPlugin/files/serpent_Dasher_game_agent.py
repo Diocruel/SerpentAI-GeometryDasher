@@ -18,7 +18,6 @@ class SerpentDasherGameAgent(GameAgent):
         self.frame_handler_setups["PLAY"] = self.setup_play
 
     def setup_play(self):
-
         classifier_path = f"datasets/pretrained_classifier.model"
 
         classifier = ImageNetwork(
@@ -37,3 +36,4 @@ class SerpentDasherGameAgent(GameAgent):
         if (prediction == 1) :
             self.input_controller.tap_key(KeyboardKey.KEY_UP)
         print("time : " + str(end-start))
+

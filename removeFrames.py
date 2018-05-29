@@ -22,4 +22,3 @@ if __name__ == "__main__":
                             print(nojumpfullpath+" deleted")
                         else:
                             print("file does not exist")
-            os.remove(directory+"/"+file)
