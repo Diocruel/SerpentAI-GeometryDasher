@@ -210,8 +210,7 @@ class SerpentRecorderGameAgent(GameAgent):
         
             small_im = game_frame.eighth_resolution_frame
             gray_im = Image.fromarray(small_im).convert("L")
-            new_thread = thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
-            new_thread.setDaemon(True)
+            thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
             frame_count += 1
         else:
             print('Game Over')
@@ -223,7 +222,6 @@ class SerpentRecorderGameAgent(GameAgent):
                     removeFramesFile = open(removeFramesFilePath,"a+")
                     removeFramesFile.write(str(frame_cnt)+"\n")
 
-                    new_thread = thread.start_new_thread(game_over,(frame_count,))
-                    new_thread.setDaemon(True)
+                    thread.start_new_thread(game_over,(frame_count,))
             #ONLY FOR TESTING SHOULD BE REMOVED LATER
             #frame_count +=1
