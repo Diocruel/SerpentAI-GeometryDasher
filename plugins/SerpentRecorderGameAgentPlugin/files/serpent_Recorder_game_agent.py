@@ -210,7 +210,8 @@ class SerpentRecorderGameAgent(GameAgent):
         
             small_im = game_frame.eighth_resolution_frame
             gray_im = Image.fromarray(small_im).convert("L")
-            thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
+            new_thread = thread.start_new_thread(save_game_frame,(gray_im,frame_count,))
+            new_thread.setDaemon(True)
             frame_count += 1
         else:
             print('Game Over')
@@ -221,13 +222,8 @@ class SerpentRecorderGameAgent(GameAgent):
                     global removeFramesFilePath
                     removeFramesFile = open(removeFramesFilePath,"a+")
                     removeFramesFile.write(str(frame_cnt)+"\n")
-                
-                thread.start_new_thread(game_over,(frame_count,))
+
+                    new_thread = thread.start_new_thread(game_over,(frame_count,))
+                    new_thread.setDaemon(True)
             #ONLY FOR TESTING SHOULD BE REMOVED LATER
             #frame_count +=1
-
-        # Check for close key press. Wait till audio thread is done writing and close all processes after.
-        if keyboard.is_pressed('q'):
-            audio_thread.join()
-            sys.exit()
-
