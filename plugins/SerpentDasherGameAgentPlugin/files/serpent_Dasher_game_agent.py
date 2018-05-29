@@ -1,10 +1,12 @@
 from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
+import numpy as np
 import keyboard
 import os
 import sys
 sys.path.append(os.getcwd())
 from ImageNetwork import ImageNetwork
+from PIL import Image
 
 from time import time
 
@@ -30,10 +32,11 @@ class SerpentDasherGameAgent(GameAgent):
 
     def handle_play(self, game_frame):
 
-        eightframe = game_frame.eighth_resolution_frame
+        small_im = game_frame.eighth_resolution_frame
         start = time()
-        prediction = self.machine_learning_models["classifier"].predict(eightframe)
+        prediction = self.machine_learning_models["classifier"].predict(small_im)
         end = time()
+        print(prediction)
         if (prediction == 1) :
             self.input_controller.tap_key(KeyboardKey.KEY_UP)
-        print("time : " + str(end-start))
+        #print("time : " + str(end-start))
