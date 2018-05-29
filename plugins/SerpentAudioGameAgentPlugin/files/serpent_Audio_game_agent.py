@@ -1,5 +1,4 @@
 from serpent.game_agent import GameAgent
-from collections import deque
 import keyboard
 import os
 import _thread as thread
@@ -8,14 +7,14 @@ import time
 import multiprocessing
 import pyaudio
 import wave
+from collections import deque
 from AudioNetwork import AudioNetwork
 
  
 def record(frames):
     global FORMAT
     global defaultframes
-
-    defaultframes = 512
+    defaultframes = 1
     FORMAT = pyaudio.paInt16
     device_info = {}
     useloopback = False
@@ -66,7 +65,7 @@ def record(frames):
         stream.start_stream()
         #start_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
         #for i in range(0, int(int(device_info["defaultSampleRate"]) / defaultframes * recordtime)):
-        frames.append(stream.read(defaultframes))
+        frames.put(np.fromstring(stream.read(defaultframes), 'Float32'))
        # print(list(frames))
     
     
@@ -78,21 +77,23 @@ def record(frames):
 class SerpentAudioGameAgent(GameAgent):
     
     def __init__(self, **kwargs):
+     
         super().__init__(**kwargs)
         global frames
-        frames = deque([],maxlen=100)
+        global dq 
+        dq = deque([], maxlen=88200)
+        frames = multiprocessing.Queue()
+        self.frame_handlers["PLAY"] = self.handle_play
+        self.frame_handler_setups["PLAY"] = self.setup_play
         audio_thread = multiprocessing.Process(target=record, args=(frames,))
         audio_thread.start()
-        self.frame_handlers["PLAY"] = self.handle_play
-
-        self.frame_handler_setups["PLAY"] = self.setup_play
        
     
     def setup_play(self):
         classifier_path = f"datasets/pretrained_audio_classifier.model"
 
         classifier = AudioNetwork(
-            input_shape=(32000, 1))  # Replace with the shape (rows, cols, channels) of your captured context frames
+            input_shape=(88200, 1))  # Replace with the shape (rows, cols, channels) of your captured context frames
 
         classifier.load_classifier(classifier_path)
 
@@ -100,12 +101,16 @@ class SerpentAudioGameAgent(GameAgent):
 
     def handle_play(self, game_frame):
         global frames
-        audioframe = list(frames)
-        print(audioframe)
-        
-        #start = time()
-        #prediction = self.machine_learning_models["classifier"].predict(audioframe)
-        #end = time()
-        #if (prediction == 1) :
-        #    self.input_controller.tap_key(KeyboardKey.KEY_UP)
-        #print("time : " + str(end-start))
+        audioframe = []
+        global dq 
+       
+        while not frames.empty(): 
+            dq.append(frames.get())
+        audioframe = np.array(list(dq))
+        #print(len(audioframe))
+        if len(audioframe) == 88200 :
+            #audioframe = audioframe[..., np.newaxis]
+            prediction = self.machine_learning_models["classifier"].predict(audioframe)
+            print(prediction)
+            #if (prediction == 1) :
+                #self.input_controller.tap_key(KeyboardKey.KEY_UP)

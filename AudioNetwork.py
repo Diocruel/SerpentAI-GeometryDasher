@@ -108,22 +108,22 @@ class AudioNetwork(ContextClassifier):
         pass
 
     def predict(self, input_frame):
-        source_min = 0
+        #source_min = 0
 
-        if str(input_frame.dtype) == "uint8":
-            source_max = 255
-        elif str(input_frame.dtype) == "float64":
-            source_max = 1
+        #if str(input_frame.dtype) == "uint8":
+        #    source_max = 255
+        #elif str(input_frame.dtype) == "float64":
+        #    source_max = 1
 
-        input_frame = np.array(serpent.cv.normalize(
-            input_frame,
-            source_min,
-            source_max,
-            target_min=-1,
-            target_max=1
-        ), dtype="float32")
+        #input_frame = np.array(serpent.cv.normalize(
+        #    input_frame,
+        #    source_min,
+        #    source_max,
+        #    target_min=-1,
+        #    target_max=1
+        #), dtype="float32")
 
-        class_probabilities = self.classifier.predict(input_frame[None, :, :, :])[0]
+        class_probabilities = self.classifier.predict(input_frame[None, :, :])[0]
 
         max_probability_index = np.argmax(class_probabilities)
         max_probability = class_probabilities[max_probability_index]
