@@ -97,7 +97,6 @@ def record():
     print("finished recording")
 
     # stop Recording
-    stream.stop_stream()
     stream.close()
     p.terminate()
 
@@ -151,19 +150,8 @@ class SerpentRecorderGameAgent(GameAgent):
         open(os.getcwd() + "\\audio\\raw\\timestamps.txt", 'w').close()
 
     def handle_play(self, game_frame):
-        global RemovedB
         prediction = self.machine_learning_models["context_classifier"].predict(game_frame.frame)
-        
-        def save_audio(frame_cnt):
-            audio_file = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", 'a')
-            if not (key_pressed or old_key_pressed):
-                audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n\n")
-                #print("Writing to no_jump")
-            else:
-                audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j\n")
-                #print("Writing to jump")
-            audio_file.close()
-
+        global RemovedB
         global timestamp
         global frame_count
         global timestamp
@@ -181,23 +169,22 @@ class SerpentRecorderGameAgent(GameAgent):
 
         old_key_pressed = key_pressed
         key_pressed = keyboard.is_pressed('space')
-        thread.start_new_thread(save_audio,(frame_count,))
         frame_count += 1
-
-        old_key_pressed = key_pressed
-        key_pressed = keyboard.is_pressed('space')
         
         if prediction != 1:
             RemovedB = False
+
             def save_game_frame(frame,frame_cnt):
-            
+                audio_file = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", 'a')
                 if not (key_pressed or old_key_pressed):
                     frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
+                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n " + str(frame_cnt) + "\n")
                     print("Writing to no_jump")
                 else:
                     frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
+                    audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j " + str(frame_cnt) + "\n")
                     print("Writing to jump")
-          
+                audio_file.close()
             
         
             #Visual debugger
