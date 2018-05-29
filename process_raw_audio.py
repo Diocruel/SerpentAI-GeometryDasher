@@ -42,25 +42,37 @@ def delete_death_frames(no_frames_to_delete):
 
     # Read in death frames
     f_death = []
-    f_death = find_files("\\datasets\\remove", f_death, ".txt", False)
+    f_death = find_files("./datasets/remove/", f_death, ".txt", False)
     f_death = open(f_death[0])
-    death_frames = f_death.readline()
+    death_frames = f_death.readlines()
     f_death.close()
 
     # Put death frames into a dictionary
     death_dict = {}
     for death_frame in death_frames:
-        death_dict[death_frame] = '0'
+        death_dict[death_frame.split()[0]] = '0'
+
+    print("Found " + str(len(death_dict)) + " death frames.")
+    print(str(death_dict) + "\n")
 
     # Go over a lines and remove death frames and frames leading to death frame
-    for line in lines:
+    delete_frames_counter = 0
+    line_pos = 0
+    while line_pos in range(0,len(lines)):
+        line = lines[line_pos - delete_frames_counter]
         frame_number = line.split()[2]
 
         # Check if frame is death frame
         if frame_number in death_dict:
-            # Remove last no_frames_to_delete frames
-            for current_frame_number in range(max(0,frame_number-10),frame_number+1):
-                pass
+            # Delete last no_frames_to_delete frames
+            for j in range(max(0,int(frame_number)-10),int(frame_number)+1):
+                # Note that list gets smaller so no need to change deletion index
+                del lines[min(max(0,int(frame_number)-no_frames_to_delete),len(lines))]
+                delete_frames_counter += 1
+        line_pos += 1
+    print("Done. Deleted " + str(delete_frames_counter) + " frames in total.\n\n")
+    for line in lines:
+        print(str(line))
 
 
 
