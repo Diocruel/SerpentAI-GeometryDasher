@@ -5,7 +5,7 @@ from pathlib import Path
 from pydub import AudioSegment
 
 
-def find_files(path, pathList, extension, subFolders = True):
+def find_files(path, path_list, extension, sub_folders = True):
     """  Recursive function to find all files of an extension type in a folder (and optionally in all subfolders too)
 
     path:        Base directory to find files
@@ -17,13 +17,13 @@ def find_files(path, pathList, extension, subFolders = True):
     try:   # Trapping a OSError:  File permissions problem I believe
         for entry in os.scandir(path):
             if entry.is_file() and entry.path.endswith(extension):
-                pathList.append(entry.path)
-            elif entry.is_dir() and subFolders:   # if its a directory, then repeat process as a nested function
-                pathList = findFilesInFolder(entry.path, pathList, extension, subFolders)
+                path_list.append(entry.path)
+            elif entry.is_dir() and sub_folders:   # if its a directory, then repeat process as a nested function
+                path_list = find_files(entry.path, path_list, extension, sub_folders)
     except OSError:
         print('Cannot access ' + path + '. Probably a permissions error')
 
-    return pathList
+    return path_list
 
 
 def check_jump(string_to_check):

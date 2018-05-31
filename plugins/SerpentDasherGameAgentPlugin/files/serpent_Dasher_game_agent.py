@@ -2,6 +2,12 @@ from serpent.game_agent import GameAgent
 from serpent.input_controller import KeyboardKey
 import keyboard
 import os
+import sys
+sys.path.append(os.getcwd())
+from ImageNetwork import ImageNetwork
+
+from time import time
+
 class SerpentDasherGameAgent(GameAgent):
 
     def __init__(self, **kwargs):
@@ -12,7 +18,6 @@ class SerpentDasherGameAgent(GameAgent):
         self.frame_handler_setups["PLAY"] = self.setup_play
 
     def setup_play(self):
-
         classifier_path = f"datasets/pretrained_classifier.model"
 
         classifier = ImageNetwork(
