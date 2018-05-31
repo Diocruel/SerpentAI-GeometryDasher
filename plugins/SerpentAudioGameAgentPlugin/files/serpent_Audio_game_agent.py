@@ -14,7 +14,7 @@ from AudioNetwork import AudioNetwork
 def record(frames):
     global FORMAT
     global defaultframes
-    defaultframes = 1
+    defaultframes = 512
     FORMAT = pyaudio.paInt16
     device_info = {}
     useloopback = False
@@ -60,7 +60,7 @@ def record(frames):
                     as_loopback=useloopback)
     
     print("recording...")
-
+    #print(int(device_info["defaultSampleRate"])) #44100
     while not keyboard.is_pressed('q'):
         stream.start_stream()
         #start_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')
@@ -105,11 +105,10 @@ class SerpentAudioGameAgent(GameAgent):
         global dq 
        
         while not frames.empty(): 
-            dq.append(frames.get())
+            dq.extend(frames.get())
         audioframe = np.array(list(dq))
-        #print(len(audioframe))
         if len(audioframe) == 88200 :
-            #audioframe = audioframe[..., np.newaxis]
+            audioframe = audioframe[..., np.newaxis]
             prediction = self.machine_learning_models["classifier"].predict(audioframe)
             print(prediction)
             #if (prediction == 1) :
