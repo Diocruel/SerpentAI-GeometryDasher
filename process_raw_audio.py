@@ -33,7 +33,7 @@ def check_jump(string_to_check):
         return false
 
 
-def delete_death_frames(no_frames_to_delete):
+def delete_death_frames(no_frames_to_delete=10):
     print("First deleting all death frames. \n")
     # Read in lines
     f = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", "r")
@@ -48,33 +48,29 @@ def delete_death_frames(no_frames_to_delete):
     f_death.close()
 
     # Put death frames into a dictionary
-    death_dict = {}
+    death_list = []
     for death_frame in death_frames:
-        death_dict[death_frame.split()[0]] = '0'
+        death_list.append(int(death_frame.split()[0]))
 
-    print("Found " + str(len(death_dict)) + " death frames.")
-    print(str(death_dict) + "\n")
+    print("Found " + str(len(death_list)) + " death frames.")
+    print(str(death_list) + "\n")
 
-    # Go over a lines and remove death frames and frames leading to death frame
     delete_frames_counter = 0
-    line_pos = 0
-    while line_pos in range(0,len(lines)):
-        line = lines[line_pos - delete_frames_counter]
-        frame_number = line.split()[2]
-
-        # Check if frame is death frame
-        if frame_number in death_dict:
-            # Delete last no_frames_to_delete frames
-            for j in range(max(0,int(frame_number)-10),int(frame_number)+1):
-                # Note that list gets smaller so no need to change deletion index
-                del lines[min(max(0,int(frame_number)-no_frames_to_delete),len(lines))]
+    for death_frame in sorted(death_list, reverse=True):
+        # Delete last 10 frames
+        for line in sorted(lines, reverse=True):
+            current_num = int(line.split()[2])
+            if (death_frame - no_frames_to_delete) < current_num <= death_frame:
+                del lines[current_num]
                 delete_frames_counter += 1
-        line_pos += 1
+
     print("Done. Deleted " + str(delete_frames_counter) + " frames in total.\n\n")
+
+    # Writing frames to disk
+    f = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", "w")
     for line in lines:
-        print(str(line))
-
-
+        f.write(line)
+    f.close()
 
 
 if __name__ == "__main__":
@@ -85,7 +81,7 @@ if __name__ == "__main__":
 
     # Delete death frames from timestamp.txt
     delete_death_frames(no_frames_to_delete)
-    raise SystemExit(0)
+    
     # Create directories
     process_time = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\"), exist_ok=True)
