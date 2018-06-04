@@ -12,8 +12,8 @@ if __name__ == "__main__":
                     nr = int(gameoverFrame)
                     for framenr in range(max(0,nr-10),nr+1):                
                         framenr = str(framenr) + ".png"
-                        jumpfullpath = "./datasets/"+foldername+"/jump/"+framenr
-                        nojumpfullpath = "./datasets/"+foldername+"/no_jump/"+framenr
+                        jumpfullpath = "./datasets/"+foldername+"/jump/"+foldername +"_" +framenr
+                        nojumpfullpath = "./datasets/"+foldername+"/no_jump/"+foldername + "_" + framenr
                         if os.path.isfile(jumpfullpath):
                             os.remove(jumpfullpath)
                             print(jumpfullpath+" deleted")

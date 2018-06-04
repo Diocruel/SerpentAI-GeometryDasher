@@ -177,11 +177,11 @@ class SerpentRecorderGameAgent(GameAgent):
             def save_game_frame(frame,frame_cnt):
                 audio_file = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", 'a')
                 if not (key_pressed or old_key_pressed):
-                    frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
+                    frame.save("datasets\\" + timestamp + "\\no_jump\\" + timestamp[:-1] + "_" + str(frame_cnt) + ".png")
                     audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n " + str(frame_cnt) + "\n")
                     print("Writing to no_jump")
                 else:
-                    frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
+                    frame.save("datasets\\" + timestamp + "\\jump\\" + timestamp[:-1] + "_" + str(frame_cnt) + ".png")
                     audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j " + str(frame_cnt) + "\n")
                     print("Writing to jump")
                 audio_file.close()
@@ -208,7 +208,7 @@ class SerpentRecorderGameAgent(GameAgent):
                     global removeFramesFilePath
                     removeFramesFile = open(removeFramesFilePath,"a+")
                     removeFramesFile.write(str(frame_cnt)+"\n")
-
-                    thread.start_new_thread(game_over,(frame_count,))
+    
+                thread.start_new_thread(game_over,(frame_count,))
             #ONLY FOR TESTING SHOULD BE REMOVED LATER
             #frame_count +=1
