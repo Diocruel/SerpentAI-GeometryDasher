@@ -169,7 +169,6 @@ class SerpentRecorderGameAgent(GameAgent):
 
         old_key_pressed = key_pressed
         key_pressed = keyboard.is_pressed('space')
-        frame_count += 1
         
         if prediction != 1:
             RemovedB = False
@@ -208,7 +207,9 @@ class SerpentRecorderGameAgent(GameAgent):
                     global removeFramesFilePath
                     removeFramesFile = open(removeFramesFilePath,"a+")
                     removeFramesFile.write(str(frame_cnt)+"\n")
-    
+                    removeFramesFile.close()
+
+
                 thread.start_new_thread(game_over,(frame_count,))
             #ONLY FOR TESTING SHOULD BE REMOVED LATER
             #frame_count +=1
