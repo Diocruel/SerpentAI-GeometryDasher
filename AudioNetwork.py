@@ -126,13 +126,12 @@ class AudioNetwork(ContextClassifier):
         class_probabilities = self.classifier.predict(input_frame[None, :, :])[0]
 
         max_probability_index = np.argmax(class_probabilities)
-        max_probability = class_probabilities[max_probability_index]
+        max_probability = class_probabilities[1]
 
-        if max_probability < 0.5:
-            return None
+        #if max_probability < 0.5:
+        #    return None
 
-        return max_probability_index
-
+        return max_probability
 
     def save_classifier(self, file_path):
         if self.classifier is not None:
