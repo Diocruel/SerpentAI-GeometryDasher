@@ -53,7 +53,7 @@ class AudioNetwork(ContextClassifier):
         x = Convolution1D(16, 9, activation='relu', padding="valid")(x)
         x = MaxPool1D(16)(x)
         x = Dropout(rate=0.1)(x)
-    
+        
         x = Convolution1D(32, 3, activation='relu', padding="valid")(x)
         x = Convolution1D(32, 3, activation='relu', padding="valid")(x)
         x = MaxPool1D(4)(x)
@@ -108,23 +108,23 @@ class AudioNetwork(ContextClassifier):
         pass
 
     def predict(self, input_frame):
-        #source_min = 0
+        source_min = 0
 
         #if str(input_frame.dtype) == "uint8":
         #    source_max = 255
         #elif str(input_frame.dtype) == "float64":
         #    source_max = 1
-
-        #input_frame = np.array(serpent.cv.normalize(
-        #    input_frame,
-        #    source_min,
-        #    source_max,
-        #    target_min=-1,
-        #    target_max=1
-        #), dtype="float32")
-
+        #print(np.isnan(input_frame).any())
+        input_frame = np.array(serpent.cv.normalize(
+            input_frame,
+            source_min,
+            source_max=1,
+            target_min=-1,
+            target_max=1
+        ), dtype="float32")
+       
+        np.nan_to_num(input_frame,copy=False)
         class_probabilities = self.classifier.predict(input_frame[None, :, :])[0]
-
         max_probability_index = np.argmax(class_probabilities)
         max_probability = class_probabilities[1]
 
@@ -206,6 +206,7 @@ class AudioNetwork(ContextClassifier):
                 break
 
         frame, _ = librosa.core.load(frame_path, sr=SAMPLE_RATE)
+        np.nan_to_num(frame,copy=False)
         frame.shape
 	
         audionetwork = AudioNetwork(input_shape=(config.audio_length, 1))
