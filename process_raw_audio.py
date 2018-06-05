@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 frame_counter_nj += 1
                 class_directory = "\\no_jump\\"
             frame_counter = frame_counter_j + frame_counter_nj
-            frame.export(os.getcwd() + "\\datasets\\audio\\" + process_time + class_directory + str(i+1)+ "_" +str(frame_counter) + ".wav", format="wav")
+            frame.export(os.getcwd() + "\\datasets\\audio\\" + process_time + class_directory + process_time[:-1] + "_" + str(i+1)+ "_" +str(frame_counter) + ".wav", format="wav")
 
             # Update to next jump timestamp
             jump_i += 1
