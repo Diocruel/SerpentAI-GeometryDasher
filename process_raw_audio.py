@@ -43,6 +43,9 @@ def delete_death_frames(no_frames_to_delete=10):
     # Read in death frames
     f_death = []
     f_death = find_files("./datasets/remove/", f_death, ".txt", False)
+    if len(f_death) == 0:
+        print("Found no game over frames!\n\n")
+        return
     f_death = open(f_death[0])
     death_frames = f_death.readlines()
     f_death.close()
