@@ -101,25 +101,16 @@ def record():
     p.terminate()
 
 class SerpentRecorderGameAgent(GameAgent):
-    global timestamp
     global frame_count
     global key_pressed
     global audio_file
     global audio_thread
     global RemovedB
-    global removeFramesFilePath
     
     RemovedB = False
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
+    
     frame_count = 0
     key_pressed = False
-
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\"), exist_ok=True)
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp), exist_ok=True)
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\jump\\"), exist_ok=True)
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\no_jump\\"), exist_ok=True)
-    #open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt","w+")
-    removeFramesFilePath = os.getcwd()+"\\datasets\\remove\\"+timestamp[:-1]+".txt"
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -131,6 +122,21 @@ class SerpentRecorderGameAgent(GameAgent):
 
     def setup_play(self):
 
+        global timestamp
+        timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
+        
+
+        
+        
+        global removeFramesFilePath
+        
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\"), exist_ok=True)
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp))
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\jump\\"))
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\no_jump\\"))
+        #open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt","w+")
+        removeFramesFilePath = os.getcwd()+"\\datasets\\remove\\"+timestamp[:-1]+".txt"
+    
         global audio_file
         global audio_thread
 
@@ -154,7 +160,6 @@ class SerpentRecorderGameAgent(GameAgent):
         global RemovedB
         global timestamp
         global frame_count
-        global timestamp
         global key_pressed
         global audio_file
         global audio_thread
