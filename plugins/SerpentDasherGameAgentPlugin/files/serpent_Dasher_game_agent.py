@@ -36,4 +36,3 @@ class SerpentDasherGameAgent(GameAgent):
         if (prediction == 1) :
             self.input_controller.tap_key(KeyboardKey.KEY_UP)
         print("time : " + str(end-start))
-
