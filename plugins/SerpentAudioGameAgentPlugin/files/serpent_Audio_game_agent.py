@@ -23,7 +23,7 @@ def record(frames):
     p = pyaudio.PyAudio()
     
     # Get input or default
-    device_id = 5
+    device_id = 4
     print("")
     
     # Get device info
@@ -81,7 +81,7 @@ class SerpentAudioGameAgent(GameAgent):
         super().__init__(**kwargs)
         global frames
         global dq 
-        dq = deque([], maxlen=88200)
+        dq = deque([], maxlen=22050)
         frames = multiprocessing.Queue()
         self.frame_handlers["PLAY"] = self.handle_play
         self.frame_handler_setups["PLAY"] = self.setup_play
@@ -93,7 +93,7 @@ class SerpentAudioGameAgent(GameAgent):
         classifier_path = f"datasets/pretrained_audio_classifier.model"
 
         classifier = AudioNetwork(
-            input_shape=(88200, 1))  # Replace with the shape (rows, cols, channels) of your captured context frames
+            input_shape=(22050, 1))  # Replace with the shape (rows, cols, channels) of your captured context frames
 
         classifier.load_classifier(classifier_path)
 
@@ -107,9 +107,11 @@ class SerpentAudioGameAgent(GameAgent):
         while not frames.empty(): 
             dq.extend(frames.get())
         audioframe = np.array(list(dq))
-        if len(audioframe) == 88200 :
+        if len(audioframe) == 22050 :
             audioframe = audioframe[..., np.newaxis]
+            np.nan_to_num(audioframe, copy=False)
+            audioframe[audioframe==0] = 1
             prediction = self.machine_learning_models["classifier"].predict(audioframe)
-            print(prediction)
+            #print("Prediction: " + str(prediction))
             #if (prediction == 1) :
                 #self.input_controller.tap_key(KeyboardKey.KEY_UP)
