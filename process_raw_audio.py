@@ -78,7 +78,7 @@ def delete_death_frames(no_frames_to_delete=10):
 
 if __name__ == "__main__":
     # Constants
-    audio_feature_length = 500  # in milliseconds
+    audio_feature_length = 2000  # in milliseconds
     date_format = '%Y-%m-%d-%H-%M-%S-%f'  # in string format based on agent settings
     no_frames_to_delete = 10 # Number of frames to delete on death frames
 

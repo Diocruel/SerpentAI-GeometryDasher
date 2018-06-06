@@ -26,7 +26,7 @@ def record(frames):
     p = pyaudio.PyAudio()
     
     # Get input or default
-    device_id = 5
+    device_id = 4
     print("")
     
     # Get device info

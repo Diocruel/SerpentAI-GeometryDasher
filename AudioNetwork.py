@@ -29,7 +29,7 @@ import pandas as pd
 import librosa
 SAMPLE_RATE = 44100
 from Config import Config, DataGenerator
-config = Config(sampling_rate=SAMPLE_RATE, audio_duration=0.5, use_mfcc=False)
+config = Config(sampling_rate=SAMPLE_RATE, audio_duration=2, use_mfcc=False)
 
 class ContextClassifierError(BaseException):
     pass
