@@ -1,17 +1,18 @@
 from serpent.machine_learning.context_classification.context_classifier import ContextClassifier
-
 from serpent.utilities import SerpentError
+import tensorflow as tf
 
 try:
     from keras.preprocessing.image import ImageDataGenerator
     from keras.applications.inception_v3 import InceptionV3, preprocess_input
     from keras.layers import (Input, Dense, GlobalAveragePooling2D, Convolution2D,
                               BatchNormalization, Flatten, GlobalMaxPool2D, MaxPool2D,
-                              concatenate, Activation)
+                              concatenate, Activation, Dropout)
     from keras.models import Model, load_model
     from keras.callbacks import ModelCheckpoint
     from keras.utils import Sequence, to_categorical
     from keras import backend as K
+    from keras.callbacks import Callback
 
 
 
@@ -24,6 +25,23 @@ import serpent.cv
 import numpy as np
 import random
 import os
+
+def auc_roc(y_true, y_pred):
+    # any tensorflow metric
+    value, update_op = tf.contrib.metrics.streaming_auc(y_pred, y_true)
+
+    # find all variables created for this metric
+    metric_vars = [i for i in tf.local_variables() if 'auc_roc' in i.name.split('/')[1]]
+
+    # Add metric variables to GLOBAL_VARIABLES collection.
+    # They will be initialized for new session.
+    for v in metric_vars:
+        tf.add_to_collection(tf.GraphKeys.GLOBAL_VARIABLES, v)
+
+    # force to update metric values
+    with tf.control_dependencies([update_op]):
+        value = tf.identity(value)
+        return value
 
 class ContextClassifierError(BaseException):
     pass
@@ -47,23 +65,45 @@ class ImageNetwork(ContextClassifier):
 
         inp = Input(shape=self.input_shape)
         #inp = self.input_shape
-        x = Convolution2D(32, (8, 8), strides=4, padding="same")(inp)
+        x = Convolution2D(32, (8, 8), strides=1, padding="same")(inp)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
         x = MaxPool2D()(x)
+        #x = Dropout(0.25)(x)
 
-        x = Convolution2D(64, (4, 4), strides=2, padding="same")(x)
+        x = Convolution2D(64, (4, 4), strides=1, padding="same")(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
-        x = MaxPool2D()(x)
+        x = Convolution2D(64, (1, 1), strides=1, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        #x = MaxPool2D()(x)
+        #x = Dropout(0.25)(x)
 
         x = Convolution2D(64, (3, 3), strides=1, padding="same")(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
         x = MaxPool2D()(x)
+        #x = Dropout(0.25)(x)
+
+        x = Convolution2D(128, (2, 2), strides=1, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        x = Convolution2D(128, (1, 1), strides=1, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        #x = MaxPool2D()(x)
+        #x = Dropout(0.25)(x)
+
+        x = Convolution2D(256, (2, 2), strides=1, padding="same")(x)
+        x = BatchNormalization()(x)
+        x = Activation("relu")(x)
+        #x = MaxPool2D()(x)
+        #x = Dropout(0.25)(x)
 
         x = Flatten()(x)
-        x = Dense(64)(x)
+        x = Dense(256)(x)
+        #x = Dropout(0.25)(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
 
@@ -91,8 +131,8 @@ class ImageNetwork(ContextClassifier):
 
         self.classifier.compile(
             optimizer="rmsprop",
-            loss="categorical_crossentropy",
-            metrics=["accuracy"]
+            loss="binary_crossentropy",
+            metrics=["accuracy", auc_roc]
         )
 
         callbacks = []
@@ -114,7 +154,7 @@ class ImageNetwork(ContextClassifier):
             nb_epoch=epochs,
             validation_data=self.validation_generator,
             nb_val_samples=self.validation_sample_count,
-            class_weight={0: 1., 1: 25.},
+            class_weight={0:1,1:250},
             callbacks=callbacks
         )
 
@@ -153,7 +193,7 @@ class ImageNetwork(ContextClassifier):
             self.classifier.save(file_path)
 
     def load_classifier(self, file_path):
-        self.classifier = load_model(file_path)
+        self.classifier = load_model(file_path, custom_objects={'auc_roc': auc_roc})
 
     def prepare_generators(self):
         training_data_generator = ImageDataGenerator(preprocessing_function=preprocess_input)
