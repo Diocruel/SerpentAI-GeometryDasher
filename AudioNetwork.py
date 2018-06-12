@@ -29,7 +29,7 @@ import pandas as pd
 import librosa
 SAMPLE_RATE = 44100
 from Config import Config, DataGenerator
-config = Config(sampling_rate=SAMPLE_RATE, audio_duration=2, use_mfcc=False)
+config = Config(sampling_rate=SAMPLE_RATE, audio_duration=0.5, use_mfcc=False)
 
 class ContextClassifierError(BaseException):
     pass
@@ -49,28 +49,28 @@ class AudioNetwork(ContextClassifier):
 
 
         inp = Input(shape=self.input_shape)
-        x = Convolution1D(16, 9, activation='relu', padding="valid")(inp)
-        x = Convolution1D(16, 9, activation='relu', padding="valid")(x)
+        x = Convolution1D(16, 9, activation='tanh', padding="valid")(inp)
+        x = Convolution1D(16, 9, activation='tanh', padding="valid")(x)
         x = MaxPool1D(16)(x)
         x = Dropout(rate=0.1)(x)
-    
-        x = Convolution1D(32, 3, activation='relu', padding="valid")(x)
-        x = Convolution1D(32, 3, activation='relu', padding="valid")(x)
+        
+        x = Convolution1D(32, 3, activation='tanh', padding="valid")(x)
+        x = Convolution1D(32, 3, activation='tanh', padding="valid")(x)
         x = MaxPool1D(4)(x)
         x = Dropout(rate=0.1)(x)
     
-        x = Convolution1D(32, 3, activation='relu', padding="valid")(x)
-        x = Convolution1D(32, 3, activation='relu', padding="valid")(x)
+        x = Convolution1D(32, 3, activation='tanh', padding="valid")(x)
+        x = Convolution1D(32, 3, activation='tanh', padding="valid")(x)
         x = MaxPool1D(4)(x)
         x = Dropout(rate=0.1)(x)
 		
-        x = Convolution1D(256, 3, activation='relu', padding="valid")(x)
-        x = Convolution1D(256, 3, activation='relu', padding="valid")(x)
+        x = Convolution1D(256, 3, activation='tanh', padding="valid")(x)
+        x = Convolution1D(256, 3, activation='tanh', padding="valid")(x)
         x = GlobalMaxPool1D()(x)
         x = Dropout(rate=0.2)(x)
 
-        x = Dense(64, activation='relu')(x)
-        x = Dense(1028, activation='relu')(x)
+        x = Dense(64, activation='tanh')(x)
+        x = Dense(1028, activation='tanh')(x)
 		
         predictions = Dense(2, activation='softmax')(x)
         self.classifier = Model(inputs=inp, outputs=predictions)
@@ -100,7 +100,7 @@ class AudioNetwork(ContextClassifier):
             nb_epoch=epochs,
             validation_data=self.validation_generator,
             nb_val_samples=self.validation_sample_count,
-            class_weight="auto",
+            class_weight={0: 4., 1: 1.},
             callbacks=callbacks
         )
 
@@ -108,31 +108,31 @@ class AudioNetwork(ContextClassifier):
         pass
 
     def predict(self, input_frame):
-        #source_min = 0
+        source_min = 0
 
         #if str(input_frame.dtype) == "uint8":
         #    source_max = 255
         #elif str(input_frame.dtype) == "float64":
         #    source_max = 1
-
-        #input_frame = np.array(serpent.cv.normalize(
-        #    input_frame,
-        #    source_min,
-        #    source_max,
-        #    target_min=-1,
-        #    target_max=1
-        #), dtype="float32")
-
+        #print(np.isnan(input_frame).any())
+        input_frame = np.array(serpent.cv.normalize(
+            input_frame,
+            source_min,
+            source_max=1,
+            target_min=-1,
+            target_max=1
+        ), dtype="float32")
+       
+        np.nan_to_num(input_frame,copy=False)
         class_probabilities = self.classifier.predict(input_frame[None, :, :])[0]
-
+        print("Class probabilities: " + str(class_probabilities))
         max_probability_index = np.argmax(class_probabilities)
         max_probability = class_probabilities[max_probability_index]
 
-        if max_probability < 0.5:
-            return None
+        #if max_probability < 0.5:
+        #    return None
 
-        return max_probability_index
-
+        return max_probability
 
     def save_classifier(self, file_path):
         if self.classifier is not None:
@@ -170,6 +170,7 @@ class AudioNetwork(ContextClassifier):
         	
         print(trainingIDs);		
         def audio_norm(data):
+            np.nan_to_num(data, copy=False)
             max_data = np.max(data)
             min_data = np.min(data)
             data = (data-min_data)/(max_data-min_data+1e-6)
@@ -207,6 +208,7 @@ class AudioNetwork(ContextClassifier):
                 break
 
         frame, _ = librosa.core.load(frame_path, sr=SAMPLE_RATE)
+        np.nan_to_num(frame,copy=False)
         frame.shape
 	
         audionetwork = AudioNetwork(input_shape=(config.audio_length, 1))

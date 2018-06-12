@@ -10,4 +10,4 @@ def train(epochs=3, validate=True, autosave=False):
     AudioNetwork.executable_train(epochs=int(epochs), validate=validate, autosave=autosave)
 
 if __name__ == '__main__':
-    train(3,True,False)
+    train(1,True,False)

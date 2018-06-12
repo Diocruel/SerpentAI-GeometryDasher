@@ -1,6 +1,9 @@
 from serpent.game_agent import GameAgent
+from serpent.input_controller import KeyboardKey
 import keyboard
 import os
+import sys
+sys.path.append(os.getcwd())
 import _thread as thread
 import numpy as np
 import time
@@ -9,8 +12,8 @@ import pyaudio
 import wave
 from collections import deque
 from AudioNetwork import AudioNetwork
+from ImageNetwork import ImageNetwork
 
- 
 def record(frames):
     global FORMAT
     global defaultframes
@@ -73,33 +76,40 @@ def record(frames):
     stream.stop_stream()
     stream.close()
     p.terminate()
-        
-class SerpentAudioGameAgent(GameAgent):
-    
+
+class SerpentCombineGameAgent(GameAgent):
+
     def __init__(self, **kwargs):
-     
         super().__init__(**kwargs)
         global frames
         global dq 
-        dq = deque([], maxlen=22050)
+        dq = deque([0]*22050, maxlen=22050)
+        
         frames = multiprocessing.Queue()
         self.frame_handlers["PLAY"] = self.handle_play
         self.frame_handler_setups["PLAY"] = self.setup_play
         audio_thread = multiprocessing.Process(target=record, args=(frames,))
         audio_thread.start()
-       
-    
+
     def setup_play(self):
-        classifier_path = f"datasets/pretrained_audio_classifier.model"
+        image_classifier_path = f"datasets/pretrained_classifier.model"
+        audio_classifier_path = f"datasets/pretrained_audio_classifier.model"
 
-        classifier = AudioNetwork(
-            input_shape=(22050, 1))  # Replace with the shape (rows, cols, channels) of your captured context frames
+        audio_classifier = AudioNetwork(
+            input_shape=(22050, 1))
+        image_classifier = ImageNetwork(
+            input_shape=(60, 80, 3))  
+       
+        image_classifier.load_classifier(image_classifier_path)
+        audio_classifier.load_classifier(audio_classifier_path)
 
-        classifier.load_classifier(classifier_path)
-
-        self.machine_learning_models["classifier"] = classifier
+        self.machine_learning_models["image_classifier"] = image_classifier 
+        self.machine_learning_models["audio_classifier"] = audio_classifier
 
     def handle_play(self, game_frame):
+        eightframe = game_frame.eighth_resolution_frame
+        image_prediction = self.machine_learning_models["image_classifier"].predict(eightframe)
+                
         global frames
         audioframe = []
         global dq 
@@ -107,11 +117,12 @@ class SerpentAudioGameAgent(GameAgent):
         while not frames.empty(): 
             dq.extend(frames.get())
         audioframe = np.array(list(dq))
+
         if len(audioframe) == 22050 :
             audioframe = audioframe[..., np.newaxis]
-            np.nan_to_num(audioframe, copy=False)
-            audioframe[audioframe==0] = 1
-            prediction = self.machine_learning_models["classifier"].predict(audioframe)
-            #print("Prediction: " + str(prediction))
-            #if (prediction == 1) :
-                #self.input_controller.tap_key(KeyboardKey.KEY_UP)
+            audio_prediction = self.machine_learning_models["audio_classifier"].predict(audioframe)
+            prediction = (image_prediction + audio_prediction)/2
+            print(audio_prediction, image_prediction, prediction)
+        #if (prediction > 0.5) :
+        #    self.input_controller.tap_key(KeyboardKey.KEY_UP)
+       

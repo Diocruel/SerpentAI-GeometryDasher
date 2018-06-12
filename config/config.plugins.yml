@@ -1,5 +1,7 @@
 SerpentAudioGameAgentPlugin:
   frame_handler: PLAY
+SerpentCombineGameAgentPlugin:
+  frame_handler: PLAY
 SerpentDasherGameAgentPlugin:
   frame_handler: PLAY
 SerpentGeometryDashGamePlugin:
