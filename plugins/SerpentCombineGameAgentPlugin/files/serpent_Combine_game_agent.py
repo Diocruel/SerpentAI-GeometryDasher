@@ -83,7 +83,7 @@ class SerpentCombineGameAgent(GameAgent):
         super().__init__(**kwargs)
         global frames
         global dq 
-        dq = deque([0]*88200, maxlen=88200)
+        dq = deque([0]*22050, maxlen=22050)
         
         frames = multiprocessing.Queue()
         self.frame_handlers["PLAY"] = self.handle_play
@@ -96,7 +96,7 @@ class SerpentCombineGameAgent(GameAgent):
         audio_classifier_path = f"datasets/pretrained_audio_classifier.model"
 
         audio_classifier = AudioNetwork(
-            input_shape=(88200, 1)) 
+            input_shape=(22050, 1))
         image_classifier = ImageNetwork(
             input_shape=(60, 80, 3))  
        
@@ -118,7 +118,7 @@ class SerpentCombineGameAgent(GameAgent):
             dq.extend(frames.get())
         audioframe = np.array(list(dq))
 
-        if len(audioframe) == 88200 :
+        if len(audioframe) == 22050 :
             audioframe = audioframe[..., np.newaxis]
             audio_prediction = self.machine_learning_models["audio_classifier"].predict(audioframe)
             prediction = (image_prediction + audio_prediction)/2
