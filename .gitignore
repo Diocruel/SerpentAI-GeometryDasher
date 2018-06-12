@@ -106,6 +106,5 @@ ENV/
 
 # mypy
 .mypy_cache/
-*.png
 *.xml
 *.iml
