@@ -33,11 +33,58 @@ def check_jump(string_to_check):
         return false
 
 
+def delete_death_frames(no_frames_to_delete=10):
+    print("First deleting all death frames. \n")
+    # Read in lines
+    f = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", "r")
+    lines = f.readlines()
+    f.close()
+
+    # Read in death frames
+    f_death = []
+    f_death = find_files("./datasets/remove/", f_death, ".txt", False)
+    if len(f_death) == 0:
+        print("Found no game over frames!\n\n")
+        return
+    f_death = open(f_death[0])
+    death_frames = f_death.readlines()
+    f_death.close()
+
+    # Put death frames into a dictionary
+    death_list = []
+    for death_frame in death_frames:
+        death_list.append(int(death_frame.split()[0]))
+
+    print("Found " + str(len(death_list)) + " death frames.")
+    print(str(death_list) + "\n")
+
+    delete_frames_counter = 0
+    for death_frame in sorted(death_list, reverse=True):
+        # Delete last 10 frames
+        for line in sorted(lines, reverse=True):
+            current_num = int(line.split()[2])
+            if (death_frame - no_frames_to_delete) < current_num <= death_frame:
+                del lines[current_num]
+                delete_frames_counter += 1
+
+    print("Done. Deleted " + str(delete_frames_counter) + " frames in total.\n\n")
+
+    # Writing frames to disk
+    f = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", "w")
+    for line in lines:
+        f.write(line)
+    f.close()
+
+
 if __name__ == "__main__":
     # Constants
     audio_feature_length = 2000  # in milliseconds
     date_format = '%Y-%m-%d-%H-%M-%S-%f'  # in string format based on agent settings
+    no_frames_to_delete = 10 # Number of frames to delete on death frames
 
+    # Delete death frames from timestamp.txt
+    delete_death_frames(no_frames_to_delete)
+    
     # Create directories
     process_time = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\"), exist_ok=True)
@@ -45,7 +92,7 @@ if __name__ == "__main__":
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time + "\\jump\\"), exist_ok=True)
     os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\audio\\" + process_time + "\\no_jump\\"), exist_ok=True)
 
-    print("Reading in files ...")
+    print("Reading in audio files ...")
     wav_files = []
     raw_audio_loc = os.getcwd() + "\\audio\\raw\\"
     wav_files = find_files(raw_audio_loc, wav_files, ".wav", False)
@@ -112,7 +159,7 @@ if __name__ == "__main__":
                 frame_counter_nj += 1
                 class_directory = "\\no_jump\\"
             frame_counter = frame_counter_j + frame_counter_nj
-            frame.export(os.getcwd() + "\\datasets\\audio\\" + process_time + class_directory + str(i+1)+ "_" +str(frame_counter) + ".wav", format="wav")
+            frame.export(os.getcwd() + "\\datasets\\audio\\" + process_time + class_directory + process_time[:-1] + "_" + str(i+1)+ "_" +str(frame_counter) + ".wav", format="wav")
 
             # Update to next jump timestamp
             jump_i += 1

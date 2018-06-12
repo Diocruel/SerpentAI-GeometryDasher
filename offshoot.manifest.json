@@ -59,6 +59,21 @@
             "config": {
                 "frame_handler": "PLAY"
             }
+        },
+        "SerpentAudioGameAgentPlugin": {
+            "name": "SerpentAudioGameAgentPlugin",
+            "version": "0.1.0",
+            "files": [
+                {
+                    "path": "serpent_Audio_game_agent.py",
+                    "pluggable": "GameAgent"
+                }
+            ],
+            "plugins": [],
+            "libraries": [],
+            "config": {
+                "frame_handler": "PLAY"
+            }
         }
     }
 }

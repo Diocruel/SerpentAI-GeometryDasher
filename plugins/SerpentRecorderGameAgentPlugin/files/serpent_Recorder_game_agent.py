@@ -101,25 +101,16 @@ def record():
     p.terminate()
 
 class SerpentRecorderGameAgent(GameAgent):
-    global timestamp
     global frame_count
     global key_pressed
     global audio_file
     global audio_thread
     global RemovedB
-    global removeFramesFilePath
     
     RemovedB = False
-    timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
+    
     frame_count = 0
     key_pressed = False
-
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\"), exist_ok=True)
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp), exist_ok=True)
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\jump\\"), exist_ok=True)
-    os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\no_jump\\"), exist_ok=True)
-    #open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt","w+")
-    removeFramesFilePath = os.getcwd()+"\\datasets\\remove\\"+timestamp[:-1]+".txt"
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -131,6 +122,21 @@ class SerpentRecorderGameAgent(GameAgent):
 
     def setup_play(self):
 
+        global timestamp
+        timestamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S\\')
+        
+
+        
+        
+        global removeFramesFilePath
+        
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\"), exist_ok=True)
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp))
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\jump\\"))
+        os.makedirs(os.path.dirname(os.getcwd() + "\\datasets\\" + timestamp + "\\no_jump\\"))
+        #open(os.getcwd() + "\\datasets\\" + timestamp + "presses.txt","w+")
+        removeFramesFilePath = os.getcwd()+"\\datasets\\remove\\"+timestamp[:-1]+".txt"
+    
         global audio_file
         global audio_thread
 
@@ -154,7 +160,6 @@ class SerpentRecorderGameAgent(GameAgent):
         global RemovedB
         global timestamp
         global frame_count
-        global timestamp
         global key_pressed
         global audio_file
         global audio_thread
@@ -169,7 +174,6 @@ class SerpentRecorderGameAgent(GameAgent):
 
         old_key_pressed = key_pressed
         key_pressed = keyboard.is_pressed('space')
-        frame_count += 1
         
         if prediction != 1:
             RemovedB = False
@@ -177,11 +181,11 @@ class SerpentRecorderGameAgent(GameAgent):
             def save_game_frame(frame,frame_cnt):
                 audio_file = open(os.getcwd() + "\\audio\\raw\\timestamps.txt", 'a')
                 if not (key_pressed or old_key_pressed):
-                    frame.save("datasets\\" + timestamp + "\\no_jump\\" + str(frame_cnt) + ".png")
+                    frame.save("datasets\\" + timestamp + "\\no_jump\\" + timestamp[:-1] + "_" + str(frame_cnt) + ".png")
                     audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " n " + str(frame_cnt) + "\n")
                     print("Writing to no_jump")
                 else:
-                    frame.save("datasets\\" + timestamp + "\\jump\\" + str(frame_cnt) + ".png")
+                    frame.save("datasets\\" + timestamp + "\\jump\\" + timestamp[:-1] + "_" + str(frame_cnt) + ".png")
                     audio_file.write(str(datetime.now().strftime('%Y-%m-%d-%H-%M-%S-%f')) + " j " + str(frame_cnt) + "\n")
                     print("Writing to jump")
                 audio_file.close()
@@ -208,7 +212,9 @@ class SerpentRecorderGameAgent(GameAgent):
                     global removeFramesFilePath
                     removeFramesFile = open(removeFramesFilePath,"a+")
                     removeFramesFile.write(str(frame_cnt)+"\n")
+                    removeFramesFile.close()
 
-                    thread.start_new_thread(game_over,(frame_count,))
+
+                thread.start_new_thread(game_over,(frame_count,))
             #ONLY FOR TESTING SHOULD BE REMOVED LATER
             #frame_count +=1
