@@ -1,6 +1,7 @@
 from serpent.machine_learning.context_classification.context_classifier import ContextClassifier
 
 from serpent.utilities import SerpentError
+import tensorflow as tf
 
 try:
     from keras.applications.inception_v3 import InceptionV3, preprocess_input
@@ -30,6 +31,24 @@ import librosa
 SAMPLE_RATE = 44100
 from Config import Config, DataGenerator
 config = Config(sampling_rate=SAMPLE_RATE, audio_duration=0.5, use_mfcc=False)
+
+
+def auc_roc(y_true, y_pred):
+    # any tensorflow metric
+    value, update_op = tf.contrib.metrics.streaming_auc(y_pred, y_true)
+
+    # find all variables created for this metric
+    metric_vars = [i for i in tf.local_variables() if 'auc_roc' in i.name.split('/')[1]]
+
+    # Add metric variables to GLOBAL_VARIABLES collection.
+    # They will be initialized for new session.
+    for v in metric_vars:
+        tf.add_to_collection(tf.GraphKeys.GLOBAL_VARIABLES, v)
+
+    # force to update metric values
+    with tf.control_dependencies([update_op]):
+        value = tf.identity(value)
+        return value
 
 class ContextClassifierError(BaseException):
     pass
@@ -78,7 +97,7 @@ class AudioNetwork(ContextClassifier):
         self.classifier.compile(
             optimizer="adam",
             loss="categorical_crossentropy",
-            metrics=["accuracy"]
+            metrics=["accuracy",auc_roc]
         )
 
         callbacks = []
@@ -108,13 +127,16 @@ class AudioNetwork(ContextClassifier):
         pass
 
     def predict(self, input_frame):
+
+        def audio_norm(data):
+            np.nan_to_num(data, copy=False)
+            max_data = np.max(data)
+            min_data = np.min(data)
+            data = (data - min_data) / (max_data - min_data + 1e-6)
+            return data - 0.5
+
         source_min = 0
 
-        #if str(input_frame.dtype) == "uint8":
-        #    source_max = 255
-        #elif str(input_frame.dtype) == "float64":
-        #    source_max = 1
-        #print(np.isnan(input_frame).any())
         input_frame = np.array(serpent.cv.normalize(
             input_frame,
             source_min,
@@ -122,15 +144,12 @@ class AudioNetwork(ContextClassifier):
             target_min=-1,
             target_max=1
         ), dtype="float32")
-       
+
         np.nan_to_num(input_frame,copy=False)
         class_probabilities = self.classifier.predict(input_frame[None, :, :])[0]
-        print("Class probabilities: " + str(class_probabilities))
+        print(class_probabilities)
         max_probability_index = np.argmax(class_probabilities)
         max_probability = class_probabilities[max_probability_index]
-
-        #if max_probability < 0.5:
-        #    return None
 
         return max_probability
 
@@ -139,16 +158,16 @@ class AudioNetwork(ContextClassifier):
             self.classifier.save(file_path)
 
     def load_classifier(self, file_path):
-        self.classifier = load_model(file_path)
+        self.classifier = load_model(file_path, custom_objects={'auc_roc': auc_roc})
 	
     def prepare_generators(self):
         trainingLabels = []
         trainingIDs = []
-        files = os.listdir('datasets/current/training/jump/')
+        files = os.listdir('datasets/current/training/yes_jump/')
         for file in files:
             if file.endswith(".wav"):
-                trainingLabels.append('jump')
-                trainingIDs.append('/jump/' +file)
+                trainingLabels.append('yes_jump')
+                trainingIDs.append('/yes_jump/' +file)
         files = os.listdir('datasets/current/training/no_jump/')
         for file in files:
             if file.endswith(".wav"):
@@ -157,11 +176,11 @@ class AudioNetwork(ContextClassifier):
                     
         validationLabels = []
         ValidtionIDS = []
-        files = os.listdir('datasets/current/validation/jump/')
+        files = os.listdir('datasets/current/validation/yes_jump/')
         for file in files:
             if file.endswith(".wav"):
-                validationLabels.append('jump')
-                ValidtionIDS.append('/jump/' +file)
+                validationLabels.append('yes_jump')
+                ValidtionIDS.append('/yes_jump/' +file)
         files = os.listdir('datasets/current/validation/no_jump/')
         for file in files:
             if file.endswith(".wav"):
@@ -217,3 +236,6 @@ class AudioNetwork(ContextClassifier):
 
         AudioNetwork.save_classifier(audionetwork, "datasets/pretrained_audio_classifier.model")
         print("Success! Model was saved to 'datasets/pretrained_audio_classifier.model'")
+
+        # check this:
+        #(X,y) = self.training_generator[0]

@@ -10,7 +10,14 @@ import wave
 from collections import deque
 from AudioNetwork import AudioNetwork
 
- 
+
+def audio_norm(data):
+    np.nan_to_num(data, copy=False)
+    max_data = np.max(data)
+    min_data = np.min(data)
+    data = (data - min_data) / (max_data - min_data + 1e-6)
+    return data - 0.5
+
 def record(frames):
     global FORMAT
     global defaultframes
@@ -102,15 +109,18 @@ class SerpentAudioGameAgent(GameAgent):
     def handle_play(self, game_frame):
         global frames
         audioframe = []
-        global dq 
-       
-        while not frames.empty(): 
+        global dq
+
+        while not frames.empty():
             dq.extend(frames.get())
         audioframe = np.array(list(dq))
         if len(audioframe) == 22050 :
+            audioframe = audio_norm(audioframe)
             audioframe = audioframe[..., np.newaxis]
             np.nan_to_num(audioframe, copy=False)
             audioframe[audioframe==0] = 1
+            #print(audioframe.shape)
+
             prediction = self.machine_learning_models["classifier"].predict(audioframe)
             #print("Prediction: " + str(prediction))
             #if (prediction == 1) :
