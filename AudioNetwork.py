@@ -29,7 +29,7 @@ import pandas as pd
 import librosa
 SAMPLE_RATE = 44100
 from Config import Config, DataGenerator
-config = Config(sampling_rate=SAMPLE_RATE, audio_duration=2, use_mfcc=False)
+config = Config(sampling_rate=SAMPLE_RATE, audio_duration=0.5, use_mfcc=False)
 
 class ContextClassifierError(BaseException):
     pass
@@ -100,7 +100,7 @@ class AudioNetwork(ContextClassifier):
             nb_epoch=epochs,
             validation_data=self.validation_generator,
             nb_val_samples=self.validation_sample_count,
-            class_weight={"auto"},
+            class_weight={0: 4., 1: 1.},
             callbacks=callbacks
         )
 
