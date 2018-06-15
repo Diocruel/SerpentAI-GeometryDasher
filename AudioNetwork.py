@@ -30,7 +30,7 @@ import pandas as pd
 import librosa
 SAMPLE_RATE = 44100
 from Config import Config, DataGenerator
-config = Config(sampling_rate=SAMPLE_RATE, audio_duration=0.5, use_mfcc=False)
+config = Config(sampling_rate=SAMPLE_RATE, audio_duration=2, use_mfcc=False)
 
 
 def auc_roc(y_true, y_pred):
@@ -149,7 +149,7 @@ class AudioNetwork(ContextClassifier):
         class_probabilities = self.classifier.predict(input_frame[None, :, :])[0]
         print(class_probabilities)
         max_probability_index = np.argmax(class_probabilities)
-        max_probability = class_probabilities[max_probability_index]
+        max_probability = class_probabilities[1]
 
         return max_probability
 

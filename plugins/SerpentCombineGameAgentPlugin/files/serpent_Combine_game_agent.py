@@ -26,7 +26,7 @@ def record(frames):
     p = pyaudio.PyAudio()
     
     # Get input or default
-    device_id = 4
+    device_id = 5
     print("")
     
     # Get device info
@@ -83,8 +83,13 @@ class SerpentCombineGameAgent(GameAgent):
         super().__init__(**kwargs)
         global frames
         global dq 
-        dq = deque([0]*22050, maxlen=22050)
-        
+        dq = deque([0]*88200, maxlen=88200)
+        global total_frames 
+        total_frames = 0
+        global correct_frames
+        correct_frames = 0
+        global incorrect_frames 
+        incorrect_frames = 0
         frames = multiprocessing.Queue()
         self.frame_handlers["PLAY"] = self.handle_play
         self.frame_handler_setups["PLAY"] = self.setup_play
@@ -92,11 +97,11 @@ class SerpentCombineGameAgent(GameAgent):
         audio_thread.start()
 
     def setup_play(self):
-        image_classifier_path = f"datasets/pretrained_classifier.model"
+        image_classifier_path = f"datasets/pretrain_classifier_super_final.model"
         audio_classifier_path = f"datasets/pretrained_audio_classifier.model"
 
         audio_classifier = AudioNetwork(
-            input_shape=(22050, 1))
+            input_shape=(88200, 1))
         image_classifier = ImageNetwork(
             input_shape=(60, 80, 3))  
        
@@ -113,16 +118,32 @@ class SerpentCombineGameAgent(GameAgent):
         global frames
         audioframe = []
         global dq 
+        global total_frames
+        global correct_frames
+        global incorrect_frames
+        key_pressed = keyboard.is_pressed('space')
        
         while not frames.empty(): 
             dq.extend(frames.get())
         audioframe = np.array(list(dq))
 
-        if len(audioframe) == 22050 :
+        if len(audioframe) == 88200 :
             audioframe = audioframe[..., np.newaxis]
+            print(audioframe.shape)
             audio_prediction = self.machine_learning_models["audio_classifier"].predict(audioframe)
             prediction = (image_prediction + audio_prediction)/2
-            print(audio_prediction, image_prediction, prediction)
+            if key_pressed and prediction > 0.5 :
+                total_frames = total_frames + 1
+                correct_frames = correct_frames + 1
+            elif not(key_pressed) and prediction <= 0.5 :
+                total_frames = total_frames + 1
+                correct_frames = correct_frames + 1
+            else :
+                total_frames = total_frames + 1
+                incorrect_frames = incorrect_frames + 1
+                
+            print("audio", audio_prediction, "image", image_prediction, "total", prediction)
+            print("Accuracy", total_frames, "correct", correct_frames, "incorrect", incorrect_frames)
         #if (prediction > 0.5) :
         #    self.input_controller.tap_key(KeyboardKey.KEY_UP)
        
