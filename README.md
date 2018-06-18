@@ -1,13 +1,9 @@
-# DL-Final-Assignment
+# Playing GeometryDash using audio and images through the SerpentAI framework.
 Final assignment for CS4180: Deep Learning at the TU Delft
 
-# Audio
+This project uses the SerpentAI framework to record frames from the Steam game GeometryDash and predicts the next action (jump/no-jump). 
+A separate Audio network is also trained to use raw audio to predict the same. 
+The two resulting networks are combined in the combineAgent to see if their combination improves prediction.
 
-[Download this](https://github.com/intxcc/pyaudio_portaudio/releases/download/1.1/PyAudio-0.2.11-cp36-cp36m-win_amd64.whl)
-pip install PyAudio-0.2.11-cp36-cp36m-win_amd64.whl
-
-## Testing the file
-python audio_test.py
-
-It will only start recording once audio is actually playing over your speakers.
-It will record until the *q*-key is pressed, which will loop 3 times and write the output to out0/1/2.wav
+This project uses a special version of PyAudio that lets you record directly from speakers,
+as well as several other python libraries. For setup instruction see [the wiki](../../wiki/Setup-instructions).
