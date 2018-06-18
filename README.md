@@ -1,4 +1,4 @@
-# Playing GeometryDash using audio and images through the SerpentAI framework.
+# Playing GeometryDash with the SerpentAI framework.
 Final assignment for CS4180: Deep Learning at the TU Delft
 
 This project uses the SerpentAI framework to record frames from the Steam game GeometryDash and predicts the next action (jump/no-jump). 
