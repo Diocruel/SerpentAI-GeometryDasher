@@ -74,6 +74,21 @@
             "config": {
                 "frame_handler": "PLAY"
             }
+        },
+        "SerpentCombineGameAgentPlugin": {
+            "name": "SerpentCombineGameAgentPlugin",
+            "version": "0.1.0",
+            "files": [
+                {
+                    "path": "serpent_Combine_game_agent.py",
+                    "pluggable": "GameAgent"
+                }
+            ],
+            "plugins": [],
+            "libraries": [],
+            "config": {
+                "frame_handler": "PLAY"
+            }
         }
     }
 }

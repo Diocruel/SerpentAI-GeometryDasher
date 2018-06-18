@@ -1,10 +1,12 @@
 SerpentAudioGameAgentPlugin:
   frame_handler: PLAY
+SerpentCombineGameAgentPlugin:
+  frame_handler: PLAY
 SerpentDasherGameAgentPlugin:
   frame_handler: PLAY
 SerpentGeometryDashGamePlugin:
-  fps: 30
+  fps: 10
 SerpentRecorderGameAgentPlugin:
   frame_handler: PLAY
 SerpentexitGamePlugin:
-  fps: 30
+  fps: 10
